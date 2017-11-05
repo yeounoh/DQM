@@ -5,6 +5,8 @@ import math, random, csv, pickle
 from estimator import *
 
 def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
+    ''' Take a random subset of data and assign it (task) to a random worker '''
+    ''' There are some overlaps, which enables error prediction. '''
     # Prepare ground truth labels
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
@@ -14,6 +16,8 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
     for w in range(n_workers):
         items = np.random.choice(n_items, int(n_items*w_coverage))
         if uniform_asgn:
+            # Uniformly assign items to workers (i.e., each item gets
+            # the same number of workers).
             n_task = int(n_items*w_coverage)
             start = (w*n_task)%n_items
             end = ((w+1)*n_task)%n_items

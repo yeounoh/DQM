@@ -14,17 +14,15 @@ class test_estimator(unittest.TestCase):
                     #lambda x: switch(x) + obvious_err,
                     lambda x: triangular_walk(x,n_max=3) + obvious_err,
                     lambda x: triangular_walk(x,n_max=5) + obvious_err,
-                    lambda x: triangular_walk(x,n_max=7) + obvious_err,
-                    lambda x: triangular_walk(x,n_max=9) + obvious_err,
-                    lambda x: triangular_walk(x,n_max=11) + obvious_err]
+                    lambda x: triangular_walk(x,n_max=10) + obvious_err,
+                    lambda x: triangular_walk(x,n_max=15) + obvious_err]
                     
         gt_list = [lambda x: gt + obvious_err, 
                    lambda x: gt + obvious_err, 
                    lambda x: gt + obvious_err,
                    lambda x: gt + obvious_err,
-                   lambda x: gt + obvious_err,
                    lambda x: gt + obvious_err]
-        legend = ["VOTING", "T-WALK (3)", "T-WALK (5)", "T-WALK (7)", "T-WALK (9)", "T-WALK (11)"]
+        legend = ["VOTING", "T-WALK (3)", "T-WALK (5)", "T-WALK (10)", "T-WALK (15)"]
         legend_gt = ["Ground Truth"]
 
         # Restaurant data
@@ -43,9 +41,9 @@ class test_estimator(unittest.TestCase):
                  filename='figure/test_restaurant_data.png')
         '''
         # Simulated data
-        data, gt = simulated_data(1000,500,0.5,uniform_asgn=False)
+        data, gt = simulated_data(1000,800,0.5,uniform_asgn=False)
         obvious_err = 0
-        (X, Y, GT) = holdout_workers(data, gt_list, range(50,550,50), est_list, rep=3)
+        (X, Y, GT) = holdout_workers(data, gt_list, range(50,850,50), est_list, rep=3)
         plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                  xaxis='Tasks', yaxis='# Error Estimate',
                  ymax=1000, xmin=100, loc='best', title='Simulated Data',

@@ -224,7 +224,7 @@ def switch(data):
 """
     Triangular Walk
 """
-def triangular_walk(data, n_max=3, p=0.8):
+def triangular_walk(data, n_max=3):
     n_items = len(data)
     n_ = np.sum(data != -1, axis=1)
     k_ = np.sum(data == 1, axis=1)
@@ -233,8 +233,13 @@ def triangular_walk(data, n_max=3, p=0.8):
     for i in range(n_items):
         if n_[i] == 0:
             continue
-        if n_[i] >= n_max and float(k_[i])/float(n_[i]) > 0.5:
+        p = float(k_[i])/float(n_[i])
+        if n_[i] >= n_max and p > 0.5:
+            # if we haven't stopped until n >= n_max.
             err += 1. / (2*p-1)
+            # p is not calculated with n = n_max,
+            # but, this should be OK, since we have
+            # worker consistency in this simulation.
 
     return math.ceil(err)
 
