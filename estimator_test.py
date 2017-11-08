@@ -59,10 +59,11 @@ class test_estimator(unittest.TestCase):
 
     def test_simulation_with_triangular_walk(self):
         n_items = 1000
-        n_workers = 600
+        n_workers = 500
         rho = 0.2
         w_range = range(50, n_workers, 50)
-        n_rep = 5
+        print 'w_range:',w_range
+        n_rep = 3
 
         est_list = [vNominal] 
         gt_list = [lambda x: gt]
@@ -76,16 +77,18 @@ class test_estimator(unittest.TestCase):
             for i in range(len(w_range)):
                 est_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
 
-            n_max_ = [20, 10, 30]
+            n_max_ = [10, 20, 30]
             avg_ = {}
             std_ = {}
             for n_max in n_max_:
                 est_ = []
                 for i in range(n_rep):
-                    est_dict = simulation_with_triangular_walk(n_items=n_items,rho=rho, n_workers=n_workers, n_max=n_max, w_coverage=cov)
+                    est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, n_max=n_max, w_coverage=cov)
                     est_.append([est_dict[w] for w in w_range])
+                    print 'n_max:%s, w:%s, est:%s'%(n_max, w_range[-1], est_dict[w_range[-1]])
                 avg_[n_max] = np.mean(est_, axis=0)
                 std_[n_max] = np.std(est_, axis=0)
+                print avg_
 
             X, Y, GT = [], [], []
             for i in range(len(w_range)):

@@ -46,10 +46,9 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
     
     results = {}
     estimates = {}
+    linearestimates = []
     items = np.random.choice(n_items, int(n_items*w_coverage))
     n_for_batch = 0
-    n_imag_cnt = 0
-    n_completion_cnt = 0
     while n_workers > 0:
         for i in items:
             if i in results:
@@ -66,30 +65,34 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
             data[i] = (l_, n_, k_)
 
             # check for stopping conditions
-            if n_ == n_max and float(k_)/float(n_) > 0.5:
-                n_completion_cnt += 1
+            if n_ == n_max and k_ > n_max/2:
                 try:
                     p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
                     results[i] = 1./(2*p_-1)            
+                    linearestimates.append(results[i]) 
+
                 except ValueError:
-                    results[i] = 0.
-                    n_imag_cnt += 1
-            elif float(k_)/float(n_) <= 0.5:
-                n_completion_cnt += 1
+                    results[i] = (2*k_ +n_ -2)/(4.*n_-4)
+      
+                    linearestimates.append(results[i])
+            elif (n_ == 1 and k_ == 0) or (n_ % 2 == 0 and k_ == n_/2):
                 results[i] = 0.
+                linearestimates.append(results[i])
 
         # output rho * n_items as estimate
-        #print 'rho %s'%np.mean(results.values())
+        if np.mean(linearestimates) == 0:
+            print 'we got 0 average of linearestimates'
+            print linearestimates
         estimates[n_workers] = np.mean(results.values()) * n_items
+        estimates[n_workers] = np.mean(linearestimates) * n_items
                 
         n_workers -= 1
         n_for_batch += 1
         if n_for_batch == n_max:
             items = np.random.choice(n_items, int(n_items*w_coverage))
             n_for_batch = 0
+            results = {}
 
-    print '%s completed triangles and %s imaginary cases'%(n_completion_cnt, n_imag_cnt)
-            
     return estimates
 
     
