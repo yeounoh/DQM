@@ -60,23 +60,23 @@ class test_estimator(unittest.TestCase):
     def test_simulation_with_triangular_walk(self):
         n_items = 1000
         n_workers = 600
-        rho = 0.3
-        data, gt = simulated_data(n_items, n_workers, rho)
+        rho = 0.2
         w_range = range(50, n_workers, 50)
         n_rep = 5
 
         est_list = [vNominal] 
         gt_list = [lambda x: gt]
-        legend = ["VOTING", "T-WALK (3)", "T-WALK (10)", "T-WALK (30)"]
+        legend = ["VOTING", "T-WALK (20)", "T-WALK (10)", "T-WALK (30)"]
         legend_gt = ["Ground Truth"]
-        (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
-        est_results = {}
-        for i in range(len(w_range)):
-            est_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
         
         for cov in [1./n_items, 20./n_items]:
+            data, gt = simulated_data(n_items, n_workers, rho, w_coverage=cov)
+            (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
+            est_results = {}
+            for i in range(len(w_range)):
+                est_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
 
-            n_max_ = [3, 10, 30]
+            n_max_ = [20, 10, 30]
             avg_ = {}
             std_ = {}
             for n_max in n_max_:
@@ -90,13 +90,13 @@ class test_estimator(unittest.TestCase):
             X, Y, GT = [], [], []
             for i in range(len(w_range)):
                 X.append(w_range[i])
-                Y.append( [ [est_results[w_range[i]][0], avg_[3][i], avg_[10][i], avg_[30][i]], 
-                            [est_results[w_range[i]][1], std_[3][i], std_[10][i], std_[30][i]] ] )
+                Y.append( [ [est_results[w_range[i]][0], avg_[20][i], avg_[10][i], avg_[30][i]], 
+                            [est_results[w_range[i]][1], std_[20][i], std_[10][i], std_[30][i]] ] )
                 GT.append([gt])
             
             plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                      xaxis='Tasks', yaxis='# Error Estimate',
-                     ymax=n_items, xmin=100, loc='best', title='Batch size: %s x %s'%(n_items,cov),
+                     ymax=n_items*rho*2, xmin=100, loc='best', title='Batch size: %s x %s'%(n_items,cov),
                      filename='figure/test_simulated_with_tri_walk_c%s.png'%cov)
 
 if __name__ == '__main__':

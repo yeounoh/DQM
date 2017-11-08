@@ -48,6 +48,8 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
     estimates = {}
     items = np.random.choice(n_items, int(n_items*w_coverage))
     n_for_batch = 0
+    n_imag_cnt = 0
+    n_completion_cnt = 0
     while n_workers > 0:
         for i in items:
             if i in results:
@@ -65,12 +67,19 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
 
             # check for stopping conditions
             if n_ == n_max and float(k_)/float(n_) > 0.5:
-                results[i] = 1./(2*float(k_)/float(n_)-1)            
+                n_completion_cnt += 1
+                try:
+                    p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
+                    results[i] = 1./(2*p_-1)            
+                except ValueError:
+                    results[i] = 0.
+                    n_imag_cnt += 1
             elif float(k_)/float(n_) <= 0.5:
+                n_completion_cnt += 1
                 results[i] = 0.
 
         # output rho * n_items as estimate
-        print 'rho %s'%np.mean(results.values())
+        #print 'rho %s'%np.mean(results.values())
         estimates[n_workers] = np.mean(results.values()) * n_items
                 
         n_workers -= 1
@@ -78,6 +87,8 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
         if n_for_batch == n_max:
             items = np.random.choice(n_items, int(n_items*w_coverage))
             n_for_batch = 0
+
+    print '%s completed triangles and %s imaginary cases'%(n_completion_cnt, n_imag_cnt)
             
     return estimates
 
