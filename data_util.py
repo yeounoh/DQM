@@ -42,14 +42,15 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
     
     data = {}
     for i in range(len(label)):
-        data[i] = (label[i], 0, 0) # (label, n, k)
+        data[i] = (label[i], 0, 0, False) # (label, n, k, is_done)
     
     results = {}
     estimates = {}
-    linearestimates = []
-    items = np.random.choice(n_items, int(n_items*w_coverage))
-    n_for_batch = 0
-    while n_workers > 0:
+    linear_estimates = []
+
+    items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+    n_workers_ = n_workers
+    while n_workers_ > 0:
         for i in items:
             if i in results:
                 continue
@@ -62,36 +63,38 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
             elif l_ == 1 and random.random() <= w_precision:
                 k_ += 1
 
-            data[i] = (l_, n_, k_)
+            is_done = False
 
             # check for stopping conditions
-            if n_ == n_max and k_ > n_max/2:
+            if n_ == n_max and float(k_)/float(n_) >= 0.5:
                 try:
                     p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
                     results[i] = 1./(2*p_-1)            
-                    linearestimates.append(results[i]) 
-
+                    linear_estimates.append(1./(2*p_-1)) 
                 except ValueError:
                     results[i] = (2*k_ +n_ -2)/(4.*n_-4)
-      
-                    linearestimates.append(results[i])
+                    linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
+                is_done = True
             elif (n_ == 1 and k_ == 0) or (n_ % 2 == 0 and k_ == n_/2):
                 results[i] = 0.
-                linearestimates.append(results[i])
+                linear_estimates.append(0.)
+                is_done = True
+
+            data[i] = (l_, n_, k_, is_done)
 
         # output rho * n_items as estimate
-        if np.mean(linearestimates) == 0:
+        if np.mean(linear_estimates) == 0:
             print 'we got 0 average of linearestimates'
-            print linearestimates
-        estimates[n_workers] = np.mean(results.values()) * n_items
-        estimates[n_workers] = np.mean(linearestimates) * n_items
+        #estimates[n_workers] = np.mean(results.values()) * n_items
+        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
+
+        # update batch (items): replace items with completed triangles
+        # sample with replacement
+        items = [i for i in items if i not in results.keys()]
+        items += list(np.random.choice(n_items, len(results)))
                 
-        n_workers -= 1
-        n_for_batch += 1
-        if n_for_batch == n_max:
-            items = np.random.choice(n_items, int(n_items*w_coverage))
-            n_for_batch = 0
-            results = {}
+        n_workers_ -= 1
+        results = {}
 
     return estimates
 
