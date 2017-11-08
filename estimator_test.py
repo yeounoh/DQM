@@ -41,25 +41,28 @@ class test_estimator(unittest.TestCase):
                  filename='figure/test_restaurant_data.png')
         '''
         # Simulated data
-        data, gt = simulated_data(1000,800,0.5,uniform_asgn=False)
+        data, gt = simulated_data(1000,600,0.2,uniform_asgn=False)
         obvious_err = 0
-        (X, Y, GT) = holdout_workers(data, gt_list, range(50,850,50), est_list, rep=3)
+        (X, Y, GT) = holdout_workers(data, gt_list, range(50,650,50), est_list, rep=3)
         plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                  xaxis='Tasks', yaxis='# Error Estimate',
                  ymax=1000, xmin=100, loc='best', title='Simulated Data',
                  filename='figure/test_simulated_data.png')
 
-        data, gt = simulated_data(1000,500,0.5,uniform_asgn=True)
+        data, gt = simulated_data(1000,600,0.2,uniform_asgn=True)
         obvious_err = 0
-        (X, Y, GT) = holdout_workers(data, gt_list, range(50,550,50), est_list, rep=3)
+        (X, Y, GT) = holdout_workers(data, gt_list, range(50,650,50), est_list, rep=3)
         plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                  xaxis='Tasks', yaxis='# Error Estimate',
                  ymax=1000, xmin=100, loc='best', title='Simulated Data',
                  filename='figure/test_simulated_data_uniform_worker_asgn.png')
 
     def test_simulation_with_triangular_walk(self):
-        data, gt = simulated_data(1000, 600, 0.5)
-        w_range = range(50, 600, 50)
+        n_items = 1000
+        n_workers = 600
+        rho = 0.3
+        data, gt = simulated_data(n_items, n_workers, rho)
+        w_range = range(50, n_workers, 50)
         n_rep = 5
 
         est_list = [vNominal] 
@@ -71,7 +74,7 @@ class test_estimator(unittest.TestCase):
         for i in range(len(w_range)):
             est_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
         
-        for cov in [0.001, 0.02]:
+        for cov in [1./n_items, 20./n_items]:
 
             n_max_ = [3, 10, 30]
             avg_ = {}
@@ -79,7 +82,7 @@ class test_estimator(unittest.TestCase):
             for n_max in n_max_:
                 est_ = []
                 for i in range(n_rep):
-                    est_dict = simulation_with_triangular_walk(rho=0.5, n_workers=600, n_max=n_max, w_coverage=cov)
+                    est_dict = simulation_with_triangular_walk(n_items=n_items,rho=rho, n_workers=n_workers, n_max=n_max, w_coverage=cov)
                     est_.append([est_dict[w] for w in w_range])
                 avg_[n_max] = np.mean(est_, axis=0)
                 std_[n_max] = np.std(est_, axis=0)
@@ -93,7 +96,7 @@ class test_estimator(unittest.TestCase):
             
             plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                      xaxis='Tasks', yaxis='# Error Estimate',
-                     ymax=1000, xmin=100, loc='best', title='Batch size: 1000x%s'%cov,
+                     ymax=n_items, xmin=100, loc='best', title='Batch size: %s x %s'%(n_items,cov),
                      filename='figure/test_simulated_with_tri_walk_c%s.png'%cov)
 
 if __name__ == '__main__':

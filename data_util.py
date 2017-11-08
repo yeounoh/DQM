@@ -58,18 +58,19 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
             k_ = data[i][2] 
             if l_ == 0 and random.random() > w_precision:
                 k_ += 1
-            elif random.random() <= w_precision:
+            elif l_ == 1 and random.random() <= w_precision:
                 k_ += 1
 
             data[i] = (l_, n_, k_)
 
             # check for stopping conditions
-            if n_ == n_max:
-                results[i] = float(k_)/float(n_)            
+            if n_ == n_max and float(k_)/float(n_) > 0.5:
+                results[i] = 1./(2*float(k_)/float(n_)-1)            
             elif float(k_)/float(n_) <= 0.5:
                 results[i] = 0.
 
         # output rho * n_items as estimate
+        print 'rho %s'%np.mean(results.values())
         estimates[n_workers] = np.mean(results.values()) * n_items
                 
         n_workers -= 1
@@ -252,7 +253,7 @@ def holdout_workers(bdataset, gt_list, worker_range, est_list,rel_err=False, rep
 
     return (X,Y,GT)
 
-def plotY1Y2(point,
+def plotY1Y2(points,
              title="",
              xaxis="",
              yaxis="Estimate",
