@@ -35,6 +35,52 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
 
     return data, ground_truth
 
+def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.2, w_coverage=0.02, w_precision=0.8):
+    label = np.zeros(n_items)
+    label[range(int(n_items*rho))] = 1
+    random.shuffle(label)
+    
+    data = {}
+    for i in range(len(label)):
+        data[i] = (label[i], 0, 0) # (label, n, k)
+    
+    results = {}
+    estimates = {}
+    items = np.random.choice(n_items, int(n_items*w_coverage))
+    n_for_batch = 0
+    while n_workers > 0:
+        for i in items:
+            if i in results:
+                continue
+
+            l_ = data[i][0]
+            n_ = data[i][1] + 1
+            k_ = data[i][2] 
+            if l_ == 0 and random.random() > w_precision:
+                k_ += 1
+            elif random.random() <= w_precision:
+                k_ += 1
+
+            data[i] = (l_, n_, k_)
+
+            # check for stopping conditions
+            if n_ == n_max:
+                results[i] = float(k_)/float(n_)            
+            elif float(k_)/float(n_) <= 0.5:
+                results[i] = 0.
+
+        # output rho * n_items as estimate
+        estimates[n_workers] = np.mean(results.values()) * n_items
+                
+        n_workers -= 1
+        n_for_batch += 1
+        if n_for_batch == n_max:
+            items = np.random.choice(n_items, int(n_items*w_coverage))
+            n_for_batch = 0
+            
+    return estimates
+
+    
 
 def restaurant_data(filename, priotization=True, wq_assurance=True):
     base_table = 'dataset/restaurant.csv'
@@ -206,7 +252,7 @@ def holdout_workers(bdataset, gt_list, worker_range, est_list,rel_err=False, rep
 
     return (X,Y,GT)
 
-def plotY1Y2(points,
+def plotY1Y2(point,
              title="",
              xaxis="",
              yaxis="Estimate",
