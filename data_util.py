@@ -80,11 +80,13 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
                 linear_estimates.append(0.)
                 is_done = True
 
-            data[i] = (l_, n_, k_, is_done)
+            if not is_done:
+                data[i] = (l_, n_, k_, is_done)
+            else: 
+                # reset because we allow sample with replacement and re-walk.
+                data[i] = (l_, 0, 0, False)
+            
 
-        # output rho * n_items as estimate
-        if np.mean(linear_estimates) == 0:
-            print 'we got 0 average of linearestimates'
         #estimates[n_workers] = np.mean(results.values()) * n_items
         estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
 
