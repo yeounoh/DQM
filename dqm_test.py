@@ -5,7 +5,7 @@ from time import time
 import pickle
 import numpy as np
 
-class test_estimator(unittest.TestCase):
+class DQMTest(unittest.TestCase):
     
     def test_estimators(self):
         print ('<<< Estimators Test >>>')
@@ -83,7 +83,6 @@ class test_estimator(unittest.TestCase):
 
         
 
-    """
     def test_different_n_max_values(self):
         n_items = 1000
         init = 20
@@ -194,6 +193,6 @@ class test_estimator(unittest.TestCase):
                          #ymax=n_items*rho*1.8, 
                          xmin=init, loc='best', title='Batch size:%sx%s, rho:%s, fnr:%s, fpr:%s'%(n_items,cov,rho,fnr,fpr),
                          filename='figure/test_simulated_with_tri_walk_c%s_r%s_fnr%s_fpr%s.png'%(cov,rho,fnr,fpr))
-    """
+
 if __name__ == '__main__':
     unittest.main()
