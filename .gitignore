@@ -1,6 +1,9 @@
 dataset/*
 figure/*
+log/*
 
 *.pyc
 *.p
-
+*.txt
+*.png
+*.pdf
