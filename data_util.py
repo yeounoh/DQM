@@ -4,6 +4,67 @@ import matplotlib.pyplot as plt
 import math, random, csv, pickle
 from estimator import *
 
+def simulated_data2(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, fpr=0.01, fnr=0.1, uniform_asgn=False):
+    ''' Take a random subset of data and assign it (task) to a random worker '''
+    ''' There are some overlaps, which enables error prediction. '''
+    # Prepare ground truth labels
+    label = np.zeros(n_items)
+    label[range(int(n_items*rho))] = 1
+    random.shuffle(label)
+
+    data = np.zeros((n_items, n_workers))-1
+    for w in range(n_workers):
+        items = np.random.choice(n_items, int(n_items*w_coverage))
+        if uniform_asgn:
+            # Uniformly assign items to workers (i.e., each item gets
+            # the same number of workers).
+            n_task = int(n_items*w_coverage)
+            start = (w*n_task)%n_items
+            end = ((w+1)*n_task)%n_items
+            if end == 0:
+                end = n_items
+            items = range(start, end)
+        
+        for i in items:
+            if (random.random() > fpr and label[i] == 0) or (random.random() > fnr and label[i] == 1):
+                data[i,w] = label[i]
+            else:
+                data[i,w] = (label[i]+1)%2
+
+    ground_truth = np.sum(label)
+
+    return data, ground_truth
+
+def simulated_data3(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
+    ''' Take a random subset of data and assign it (task) to a random worker '''
+    ''' There are some overlaps, which enables error prediction. '''
+    # Prepare ground truth labels
+    label = np.zeros(n_items)
+    label[range(int(n_items*rho))] = 1
+    random.shuffle(label)
+
+    data = np.zeros((n_items, n_workers))-1
+    for w in range(n_workers):
+        items = np.random.choice(n_items, int(n_items*w_coverage))
+        if uniform_asgn:
+            # Uniformly assign items to workers (i.e., each item gets
+            # the same number of workers).
+            n_task = int(n_items*w_coverage)
+            start = (w*n_task)%n_items
+            end = ((w+1)*n_task)%n_items
+            if end == 0:
+                end = n_items
+            items = range(start, end)
+        
+        for i in items:
+            if random.random() <= (w_precision - random.random()/2.):
+                data[i,w] = label[i]
+            else:
+                data[i,w] = (label[i]+1)%2
+
+    ground_truth = np.sum(label)
+
+    return data, ground_truth
 def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
     ''' Take a random subset of data and assign it (task) to a random worker '''
     ''' There are some overlaps, which enables error prediction. '''
@@ -35,7 +96,7 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
 
     return data, ground_truth
 
-def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.2, w_coverage=0.02, w_precision=0.8):
+def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.2, w_coverage=0.02, w_precision=0.8, sequential=True):
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
     random.shuffle(label)
@@ -63,9 +124,9 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
             elif l_ == 1 and random.random() <= w_precision:
                 k_ += 1
 
-            is_done = False
 
             # check for stopping conditions
+            is_done = False
             if n_ == n_max and float(k_)/float(n_) >= 0.5:
                 try:
                     p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
@@ -92,8 +153,79 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
 
         # update batch (items): replace items with completed triangles
         # sample with replacement
-        items = [i for i in items if i not in results.keys()]
-        items += list(np.random.choice(n_items, len(results)))
+        if sequential:
+            items = [i for i in items if i not in results.keys()]
+            items += list(np.random.choice(n_items, len(results)))
+        else:
+            items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+                
+        n_workers_ -= 1
+        results = {}
+
+    return estimates
+
+def simulation_with_triangular_walk2(n_items=1000, n_workers=100, n_max=5, rho=0.2, w_coverage=0.02, fpr=0.01, fnr=0.1, sequential=True):
+    label = np.zeros(n_items)
+    label[range(int(n_items*rho))] = 1
+    random.shuffle(label)
+    
+    data = {}
+    for i in range(len(label)):
+        data[i] = (label[i], 0, 0, False) # (label, n, k, is_done)
+    
+    results = {}
+    estimates = {}
+    linear_estimates = []
+
+    items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+    n_workers_ = n_workers
+    while n_workers_ > 0:
+        for i in items:
+            if i in results:
+                continue
+
+            l_ = data[i][0]
+            n_ = data[i][1] + 1
+            k_ = data[i][2] 
+            if l_ == 0 and random.random() <= fpr:
+                k_ += 1
+            elif l_ == 1 and random.random() > fnr:
+                k_ += 1
+
+
+            # check for stopping conditions
+            is_done = False
+            if n_ == n_max and float(k_)/float(n_) >= 0.5:
+                try:
+                    p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
+                    results[i] = 1./(2*p_-1)            
+                    linear_estimates.append(1./(2*p_-1)) 
+                except ValueError:
+                    results[i] = (2*k_ +n_ -2)/(4.*n_-4)
+                    linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
+                is_done = True
+            elif (n_ == 1 and k_ == 0) or (n_ % 2 == 0 and k_ == n_/2):
+                results[i] = 0.
+                linear_estimates.append(0.)
+                is_done = True
+
+            if not is_done:
+                data[i] = (l_, n_, k_, is_done)
+            else: 
+                # reset because we allow sample with replacement and re-walk.
+                data[i] = (l_, 0, 0, False)
+            
+
+        #estimates[n_workers] = np.mean(results.values()) * n_items
+        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
+
+        # update batch (items): replace items with completed triangles
+        # sample with replacement
+        if sequential:
+            items = [i for i in items if i not in results.keys()]
+            items += list(np.random.choice(n_items, len(results)))
+        else:
+            items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
                 
         n_workers_ -= 1
         results = {}
@@ -107,13 +239,16 @@ def restaurant_data(filename, priotization=True, wq_assurance=True):
     hard_pairs_ = pickle.load( open('dataset/hard_pairs.p','rb') )
     hard_pairs = {}
 
-    for p in hard_pairs_:
-        rid1 = int(p[0][0])
-        rid2 = int(p[0][1])
-        if rid1 < rid2:
-            hard_pairs[(rid1,rid2)] = float(p[1])
-        else:
-            hard_pairs[(rid2,rid1)] = float(p[1])
+    with open("hard_pairs.txt", "w") as f:
+        
+        for p in hard_pairs_:
+            f.write(str(p)+'\n')
+            rid1 = int(p[0][0])
+            rid2 = int(p[0][1])
+            if rid1 < rid2:
+                hard_pairs[(rid1,rid2)] = float(p[1])
+            else:
+                hard_pairs[(rid2,rid1)] = float(p[1])
     records = {}
     with open(base_table, 'rb') as f:
         reader = csv.reader(f)
@@ -298,9 +433,7 @@ def plotY1Y2(points,
 
     fig, ax = plt.subplots(1,figsize=(8,5))
     colors = ['#00ff99','#0099ff','#ffcc00','#ff5050','#9900cc','#5050ff','#99cccc','#0de4f6']
-    colors = ['#0099ff','#00ff99','#ffcc00','#ff5050','#9900cc','#5050ff','#99cccc','#0de4f6']
     markers = ['o-','v-','^-','s-','*-','x-','+-','D-']
-    markers = ['v-','o-','^-','s-','*-','x-','+-','D-']
     shapes = ['--','-*']
 
     for i in range(num_gt):
@@ -353,3 +486,12 @@ def jaccard(a,b):
     word_set_b = set(b.lower().split())
     word_set_c = word_set_a.intersection(word_set_b)
     return float(len(word_set_c)) / (len(word_set_a) + len(word_set_b) - len(word_set_c))
+
+if __name__=="__main__":
+        data, gt = restaurant_data(['dataset/good_worker/restaurant_additional.csv',
+                                    'dataset/good_worker/restaurant_new.csv'])
+        pair_solution = pickle.load( open('dataset/rest_solution.p','rb') )
+        slist = pair_solution.values()
+        easy_pair_solution = pickle.load( open('dataset/easy_rest_solution.p','rb') ) 
+        easy_slist = easy_pair_solution.values()
+        obvious_err = np.sum(np.array(easy_slist) == 1) 

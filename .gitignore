@@ -1,0 +1,6 @@
+dataset/*
+figure/*
+
+*.pyc
+*.p
+

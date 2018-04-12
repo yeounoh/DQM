@@ -226,22 +226,84 @@ def switch(data):
 """
 def triangular_walk(data, n_max=3):
     n_items = len(data)
-    n_ = np.sum(data != -1, axis=1)
-    k_ = np.sum(data == 1, axis=1)
 
-    err = 0.
+    linear_estimates = []
     for i in range(n_items):
-        if n_[i] == 0:
-            continue
-        p = float(k_[i])/float(n_[i])
-        if n_[i] >= n_max and p > 0.5:
-            # if we haven't stopped until n >= n_max.
-            err += 1. / (2*p-1)
-            # p is not calculated with n = n_max,
-            # but, this should be OK, since we have
-            # worker consistency in this simulation.
+        n_ = 0.
+        k_ = 0.
+        for w in data[i]:
+            if w != -1:
+                n_ += 1
+                k_ += w
 
-    return math.ceil(err)
+                if n_ == n_max and k_/n_ >= 0.5:
+                    try:
+                        p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
+
+                        # if we haven't stopped until n >= n_max.
+                        linear_estimates.append(1. / (2*p_-1))
+                    except ValueError:
+                        linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
+                    n_ = 0.
+                    k_ = 0.
+                elif n_ > 0 and k_/n_ < 0.5: 
+                    linear_estimates.append(0.)
+                    n_ = 0.
+                    k_ = 0.
+                    
+    return np.mean(linear_estimates) * n_items
+           
+            
+def expectation_maximization(data, alpha=0.8, beta=0.2):
+    '''
+        EM algorithm for worker quality estimation, argmax log(P(q|X, Beta~(alpha,beta))).
+    '''
+    
+    # initialize with majority voting
+    mu_clean = np.zeros(len(data))
+    mu_dirty = np.zeros(len(data))
+    for i in range(len(data)):
+        if np.sum(data[i] == 1) > np.sum(data[i] != -1)/2.:
+            mu_dirty[i] = 1.
+        else:
+            mu_clean[i] = 1.
+    # initial worker quality set to alpha
+    q_new = np.zeros(len(data[0])) + alpha
+    q_ = np.zeros(len(data[0])) + 0.5
+    while np.sum(q_new - q_) > 0.:
+        q_ = q_new
+        # E-step
+        for i in range(len(data)):
+            mu_err = 1.
+            mu_not_err = 1.
+            for j in range(len(data[i])):
+                if data[i][j] == 1:
+                    mu_err *= q_[j]
+                    mu_not_err *= (1-q_[j])
+                elif data[i][j] == 0:
+                    mu_err *= (1-q_[j])
+                    mu_not_err *= q_[j]
+            mu_dirty[i] = mu_err
+            mu_clean[i] = mu_not_err
+
+        # M-step
+        for j in range(len(data[0])):
+            q_j = alpha - 1
+            n_votes = 0.
+            for i in range(len(data)):
+                if data[i][j] == 0:
+                    q_j += mu_clean[i]
+                    n_votes += 1
+                elif data[i][j] == 1:
+                    q_j += mu_dirty[i]
+                    n_votes += 1 
+            q_j /= (n_votes + alpha + beta - 2)
+            q_new[j] = q_j
+
+    return np.sum(mu_dirty > mu_clean)
+    
+    
+            
 
 def remain_switch(data, pos_switch=True, neg_switch=True):
     data_subset = copy.deepcopy(data)
