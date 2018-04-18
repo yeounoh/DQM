@@ -233,23 +233,25 @@ def triangular_walk(data, n_max=3):
         k_ = 0.
         for w in data[i]:
             if w != -1:
-                n_ += 1
-                k_ += w
+                n_ += 1.
+                k_ += float(w)
 
-                if n_ == n_max and k_/n_ >= 0.5:
-                    try:
-                        p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
-
-                        # if we haven't stopped until n >= n_max.
-                        linear_estimates.append(1. / (2*p_-1))
-                    except ValueError:
-                        linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
-                    n_ = 0.
-                    k_ = 0.
-                elif n_ > 0 and k_/n_ < 0.5: 
-                    linear_estimates.append(0.)
-                    n_ = 0.
-                    k_ = 0.
+                if n_ < n_max and k_/n_ > 0.5:
+                    continue
+                else:
+                    # check stopping conditions
+                    if k_/n_ <= 0.5:
+                        linear_estimates.append(0.)
+                        break
+                    else: # n=n_max
+                        try:
+                            if (2-n_max-2*k_)**2-4*(2*n_max-2)*k_) >= 0: 
+                                p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
+                                linear_estimates.append(1. / (2*p_-1))
+                            else:
+                                linear_estimates.append((2.*k_+n_max-2)/(4*n_max-4))
+                        except ValueError:
+                            linear_estimates.append((2.*k_+n_max-2)/(4*n_max-4))
                     
     return np.mean(linear_estimates) * n_items
            

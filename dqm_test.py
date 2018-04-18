@@ -11,21 +11,21 @@ class DQMTest(unittest.TestCase):
         print ('<<< Estimators Test >>>')
         est_list = [#lambda x: nominal(x) + obvious_err, 
                     lambda x: vNominal(x) + obvious_err, 
-                    #lambda x: switch(x) + obvious_err,
-                    lambda x: expectation_maximization(x, alpha=0.7, beta=0.2) + obvious_err,
+                    lambda x: switch(x) + obvious_err,
+                    #lambda x: expectation_maximization(x, alpha=0.7, beta=0.2) + obvious_err,
                     #lambda x: triangular_walk(x,n_max=5) + obvious_err,
-                    #lambda x: triangular_walk(x,n_max=15) + obvious_err,
-                    #lambda x: triangular_walk(x,n_max=30) + obvious_err,
+                    lambda x: triangular_walk(x,n_max=10) + obvious_err,
+                    lambda x: triangular_walk(x,n_max=30) + obvious_err,
                    ]
                     
         gt_list = [#lambda x: gt + obvious_err, 
                    lambda x: gt + obvious_err, 
                    #lambda x: gt + obvious_err, 
                    lambda x: gt + obvious_err,
-                   #lambda x: gt + obvious_err,
-                   #lambda x: gt + obvious_err,
+                   lambda x: gt + obvious_err,
+                   lambda x: gt + obvious_err,
                   ]
-        legend = ["VOTING", "EM"] #"T-WALK (15)", "T-WALK (30)"]
+        legend = ["VOTING", "SWITCH", "T-WALK (10)", "T-WALK (30)"]
         legend_gt = ["Ground Truth"]
 
         # Restaurant data
@@ -44,44 +44,27 @@ class DQMTest(unittest.TestCase):
                  filename='figure/test_restaurant_data.png')
         '''
         # Simulated data
-        init = 20
-        n_workers = 1000
-        step = 100
-        w_range = range(init, n_workers, step)
-        rho = 0.5
-        data, gt = simulated_data(1000,n_workers,rho,w_coverage=0.02, uniform_asgn=False)
+        ## Worker parameters
+        n_workers = 1400
+        w_number = range(200, n_workers, 200)
+        w_quality = [0.8] #[0.7, 0.8, 0.95] 
+        w_c = 0.02
+        ## Error proportion
+        n_items = 1000
+        rho = 0.01
         obvious_err = 0
-        """
-        (X, Y, GT) = holdout_workers(data, gt_list, w_range, est_list, rep=1)
-        plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
-                 xaxis='Tasks', yaxis='# Error Estimate',
-                 ymax=1000, xmin=init, loc='best', title='Random Worker Assignment, rho:%s'%rho,
-                 filename='figure/test_simulated_data_random_asgn_r%s.png'%rho)
-        """
-        rho = 0.5
-        data, gt = simulated_data(1000,n_workers,rho,w_coverage=0.02, uniform_asgn=False)
-        obvious_err = 0
-        (X, Y, GT) = holdout_workers(data, gt_list, w_range, est_list, rep=3)
-        plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
-                 xaxis='Tasks', yaxis='# Positive Labels',
-                 ymax=1000, xmin=init, loc='best', title='Only with good workers',
-                 filename='figure/label_prediction_good_worker.png')
-        data, gt = simulated_data(1000,n_workers,rho,w_coverage=0.02, w_precision=0.6, uniform_asgn=False)
-        obvious_err = 0
-        (X, Y, GT) = holdout_workers(data, gt_list, w_range, est_list, rep=3)
-        plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
-                 xaxis='Tasks', yaxis='# Positive Labels',
-                 ymax=1000,xmin=init, loc='best', title='Only with bad workers',
-                 filename='figure/label_prediction_bad_worker.png')
-        data, gt = simulated_data3(1000,n_workers,rho,w_coverage=0.02, uniform_asgn=False)
-        obvious_err = 0
-        (X, Y, GT) = holdout_workers(data, gt_list, w_range, est_list, rep=3)
-        plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
-                 xaxis='Tasks', yaxis='# Positive Labels',
-                 ymax=1000,xmin=init, loc='best', title='Noisy and diverse workers',
-                 filename='figure/label_prediction_diverse_worker.png')
 
-        
+        for w_q in w_quality:
+            data, gt = simulated_data(n_items, n_workers, rho, w_coverage=w_c, w_precision=w_q)
+
+            (X, Y, GT) = holdout_workers(data, gt_list, w_number, est_list, rep=5)
+            plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
+                     xaxis='Tasks', yaxis='# Errors',
+                     ymax=50, xmin=200, loc='best', title='Worker quality: %s'%str(w_q),
+                     filename='figure/test_estimators_r%s_c%s_q%s.png'%(rho,w_c,w_q))
+
+
+
 
     def test_different_n_max_values(self):
         n_items = 1000
