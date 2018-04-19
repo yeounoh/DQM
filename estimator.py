@@ -252,8 +252,8 @@ def triangular_walk(data, n_max=3):
                             p_ = ((2.*k_+n_max-2)/(4*n_max-4))
 
                         linear_estimates.append(1. / (2*p_-1))
-                        n_ = 0.
-                        k_ = 0.
+                    n_ = 0.
+                    k_ = 0.
                     
     return np.mean(linear_estimates) * n_items
            

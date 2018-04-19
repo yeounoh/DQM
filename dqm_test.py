@@ -11,7 +11,7 @@ class DQMTest(unittest.TestCase):
         print ('<<< Estimators Test >>>')
         est_list = [#lambda x: nominal(x) + obvious_err, 
                     lambda x: vNominal(x) + obvious_err, 
-                    lambda x: switch(x) + obvious_err,
+                    #lambda x: switch(x) + obvious_err,
                     #lambda x: expectation_maximization(x, alpha=0.7, beta=0.2) + obvious_err,
                     #lambda x: triangular_walk(x,n_max=5) + obvious_err,
                     lambda x: triangular_walk(x,n_max=10) + obvious_err,
@@ -21,11 +21,11 @@ class DQMTest(unittest.TestCase):
         gt_list = [#lambda x: gt + obvious_err, 
                    lambda x: gt + obvious_err, 
                    #lambda x: gt + obvious_err, 
-                   lambda x: gt + obvious_err,
+                   #lambda x: gt + obvious_err,
                    lambda x: gt + obvious_err,
                    #lambda x: gt + obvious_err,
                   ]
-        legend = ["VOTING", "SWITCH", "T-WALK (10)"]
+        legend = ["VOTING", "T-WALK (10)"]
         legend_gt = ["Ground Truth"]
 
         # Restaurant data
@@ -45,7 +45,7 @@ class DQMTest(unittest.TestCase):
         '''
         # Simulated data
         ## Worker parameters
-        n_workers = 1600
+        n_workers = 1400
         w_number = range(200, n_workers, 200)
         w_quality = [0.7, 0.8, 0.95] 
         w_c = 0.02
@@ -57,7 +57,7 @@ class DQMTest(unittest.TestCase):
         for w_q in w_quality:
             data, gt = simulated_data(n_items, n_workers, rho, w_coverage=w_c, w_precision=w_q)
 
-            (X, Y, GT) = holdout_workers(data, gt_list, w_number, est_list, rep=50)
+            (X, Y, GT) = holdout_workers(data, gt_list, w_number, est_list, rep=100)
             plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                      xaxis='Tasks', yaxis='# Errors',
                      ymax=50, xmin=200, loc='best', title='Worker quality: %s'%str(w_q),
