@@ -246,11 +246,12 @@ def triangular_walk(data, n_max=3):
                         try:
                             if (2-n_max-2*k_)**2-4*(2*n_max-2)*k_ >= 0: 
                                 p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
-                                linear_estimates.append(1. / (2*p_-1))
                             else:
-                                linear_estimates.append((2.*k_+n_max-2)/(4*n_max-4))
+                                p_ = ((2.*k_+n_max-2)/(4*n_max-4))
                         except ValueError:
-                            linear_estimates.append((2.*k_+n_max-2)/(4*n_max-4))
+                            p_ = ((2.*k_+n_max-2)/(4*n_max-4))
+
+                        linear_estimates.append(1. / (2*p_-1))
                         n_ = 0.
                         k_ = 0.
                     
