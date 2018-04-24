@@ -75,17 +75,14 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
     for i in range(len(label)):
         data[i] = (label[i], 0., 0.) # (label, n, k)
     
-    results = {}
-    estimates = {}
-    linear_estimates = []
+    completed = set()
+    estimates = dict()
+    linear_estimates = list()
 
     items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
     n_workers_ = n_workers
     while n_workers_ > 0:
         for i in items:
-            if i in results:
-                continue
-
             l_ = data[i][0]
             n_ = data[i][1] + 1.
             k_ = data[i][2] 
@@ -98,7 +95,7 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
             if n_ < n_max and k_/n_ > 0.5:
                 data[i] = (l_, n_, k_)
             else:
-                results[i] = 0.
+                completed.add(i)
                 if k_/n_ <= 0.5:
                     linear_estimates.append(0.)
                 else:
@@ -110,22 +107,6 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
 
                 # reset because we allow sample with replacement and re-walk.
                 data[i] = (l_, 0., 0.)
-
-            '''
-            if n_ == n_max and float(k_)/float(n_) >= 0.5:
-                try:
-                    p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
-                    results[i] = 1./(2*p_-1)            
-                    linear_estimates.append(1./(2*p_-1)) 
-                except ValueError:
-                    results[i] = (2*k_ +n_ -2)/(4.*n_-4)
-                    linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
-                is_done = True
-            elif (n_ == 1 and k_ == 0) or (n_ % 2 == 0 and k_ == n_/2):
-                results[i] = 0.
-                linear_estimates.append(0.)
-                is_done = True
-            '''
             
         #estimates[n_workers] = np.mean(results.values()) * n_items
         estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
@@ -133,7 +114,7 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
         # update batch (items): replace items with completed triangles
         # sample with replacement
         if sequential:
-            items = [i for i in items if i not in results.keys()]
+            items = [i for i in items if i not in completed]
             items += list(np.random.choice(n_items, len(results)))
         else:
             items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
@@ -152,8 +133,8 @@ def simulation_with_triangular_walk2(n_items=1000, n_workers=100, n_max=5, rho=0
     for i in range(len(label)):
         data[i] = (label[i], 0, 0, False) # (label, n, k, is_done)
     
-    results = {}
-    estimates = {}
+    completed = set()
+    estimates = dict()
     linear_estimates = []
 
     items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
@@ -177,10 +158,10 @@ def simulation_with_triangular_walk2(n_items=1000, n_workers=100, n_max=5, rho=0
             if n_ == n_max and float(k_)/float(n_) >= 0.5:
                 try:
                     p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
-                    results[i] = 1./(2*p_-1)            
+                    completed.add(i)            
                     linear_estimates.append(1./(2*p_-1)) 
                 except ValueError:
-                    results[i] = (2*k_ +n_ -2)/(4.*n_-4)
+                    completed.add(i)
                     linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
                 is_done = True
             elif (n_ == 1 and k_ == 0) or (n_ % 2 == 0 and k_ == n_/2):

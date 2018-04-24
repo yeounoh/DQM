@@ -79,7 +79,7 @@ class DQMTest(unittest.TestCase):
         #est_list = [vNominal]
         gt_list = [lambda x: gt, lambda x: gt]
         #gt_list = [lambda x: gt]
-        n_max_ = [10,20,30]
+        n_max_ = [10,20,30, 50, 100]
         legend = ["VOTING","SWITCH"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
         legend_gt = ["Ground Truth"]
         
@@ -89,7 +89,7 @@ class DQMTest(unittest.TestCase):
                     data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
                     (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
                     voting_results = {}
-                    switch_results = {}
+                    #switch_results = {}
                     for i in range(len(w_range)):
                         voting_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
                         switch_results[w_range[i]] = (Y_[i][0][1], Y_[i][1][1])
@@ -121,6 +121,54 @@ class DQMTest(unittest.TestCase):
                              xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
                              filename = 'figure/test_simulated_with_tri_walk_c%s_r%s_q%s.png'%(cov,rho,prec))
 
+
+    def test_estimators2(self):
+        n_items = 1000
+        init = 200
+        n_workers = 4000
+        step = 400
+        w_range = range(init, n_workers, step)
+        n_rep = 30
+
+        est_list = [vNominal]
+        gt_list = [lambda x: gt]
+        n_max_ = [10,20,30, 50, 100]
+        legend = ["VOTING"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
+        legend_gt = ["Ground Truth"]
+        
+        for rho in [0.02]:
+            for prec in [0.7, 0.8, 0.95]:
+                for cov in [20./n_items]:
+                    data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
+                    (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
+                    voting_results = {}
+                    for i in range(len(w_range)):
+                        voting_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
+
+                    avg_ = {}
+                    std_ = {}
+                    for n_max in n_max_:
+                        est_ = []
+                        for i in range(n_rep):
+                            est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, 
+                                                                       n_max=n_max, w_coverage=cov, w_precision=prec)
+                            est_.append([est_dict[w] for w in w_range])
+                        avg_[n_max] = np.mean(est_, axis=0)
+                        std_[n_max] = np.std(est_, axis=0)
+
+                    X, Y, GT = [], [], []
+                    for i in range(len(w_range)):
+                        X.append(w_range[i])
+                        Y.append( [ [voting_results[w_range[i]][0], 
+                                     ] + [avg_[n_max][i] for n_max in n_max_], 
+                                    [voting_results[w_range[i]][1], 
+                                    ] + [std_[n_max][i] for n_max in n_max_] ] )
+                        GT.append([gt])
+
+                    plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
+                             xaxis='Tasks', yaxis='# Error Estimate', 
+                             xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
+                             filename = 'figure/test_simulated_with_tri_walk2_c%s_r%s_q%s.png'%(cov,rho,prec))
 
     def test_robustness_to_fp_fn(self):
         n_items = 1000
