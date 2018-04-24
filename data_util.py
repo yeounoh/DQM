@@ -35,36 +35,6 @@ def simulated_data2(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, fpr=0
 
     return data, ground_truth
 
-def simulated_data3(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
-    ''' Take a random subset of data and assign it (task) to a random worker '''
-    ''' There are some overlaps, which enables error prediction. '''
-    # Prepare ground truth labels
-    label = np.zeros(n_items)
-    label[range(int(n_items*rho))] = 1
-    random.shuffle(label)
-
-    data = np.zeros((n_items, n_workers))-1
-    for w in range(n_workers):
-        items = np.random.choice(n_items, int(n_items*w_coverage))
-        if uniform_asgn:
-            # Uniformly assign items to workers (i.e., each item gets
-            # the same number of workers).
-            n_task = int(n_items*w_coverage)
-            start = (w*n_task)%n_items
-            end = ((w+1)*n_task)%n_items
-            if end == 0:
-                end = n_items
-            items = range(start, end)
-        
-        for i in items:
-            if random.random() <= (w_precision - random.random()/2.):
-                data[i,w] = label[i]
-            else:
-                data[i,w] = (label[i]+1)%2
-
-    ground_truth = np.sum(label)
-
-    return data, ground_truth
 def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
     ''' Take a random subset of data and assign it (task) to a random worker '''
     ''' There are some overlaps, which enables error prediction. '''
@@ -103,7 +73,7 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
     
     data = {}
     for i in range(len(label)):
-        data[i] = (label[i], 0, 0, False) # (label, n, k, is_done)
+        data[i] = (label[i], 0., 0.) # (label, n, k)
     
     results = {}
     estimates = {}
@@ -117,16 +87,31 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
                 continue
 
             l_ = data[i][0]
-            n_ = data[i][1] + 1
+            n_ = data[i][1] + 1.
             k_ = data[i][2] 
             if l_ == 0 and random.random() > w_precision:
-                k_ += 1
+                k_ += 1.
             elif l_ == 1 and random.random() <= w_precision:
-                k_ += 1
-
+                k_ += 1.
 
             # check for stopping conditions
-            is_done = False
+            if n_ < n_max and k_/n_ > 0.5:
+                data[i] = (l_, n_, k_)
+            else:
+                results[i] = 0.
+                if k_/n_ <= 0.5:
+                    linear_estimates.append(0.)
+                else:
+                    if (2-n_max-2*k_)**2 -4*(2*n_max-2)*k_ >= 0:
+                        p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
+                    else:
+                        p_ = ((2.*k_+n_max-2)/(4*n_max-4))
+                    linear_estimates.append(1./(2*p_-1.))
+
+                # reset because we allow sample with replacement and re-walk.
+                data[i] = (l_, 0., 0.)
+
+            '''
             if n_ == n_max and float(k_)/float(n_) >= 0.5:
                 try:
                     p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
@@ -140,14 +125,8 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
                 results[i] = 0.
                 linear_estimates.append(0.)
                 is_done = True
-
-            if not is_done:
-                data[i] = (l_, n_, k_, is_done)
-            else: 
-                # reset because we allow sample with replacement and re-walk.
-                data[i] = (l_, 0, 0, False)
+            '''
             
-
         #estimates[n_workers] = np.mean(results.values()) * n_items
         estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
 
