@@ -4,6 +4,7 @@ from estimator import *
 from time import time
 import pickle
 import numpy as np
+import concurrent.futures
 
 class DQMTest(unittest.TestCase):
     
@@ -66,78 +67,94 @@ class DQMTest(unittest.TestCase):
 
 
 
-
     def test_estimators(self):
         n_items = 1000
         init = 200
-        n_workers = 4000
-        step = 400
+        n_workers = 2000
+        step = 200
         w_range = range(init, n_workers, step)
-        n_rep = 30
+        n_rep = 1
 
         est_list = [vNominal, switch]
-        #est_list = [vNominal]
         gt_list = [lambda x: gt, lambda x: gt]
-        #gt_list = [lambda x: gt]
-        n_max_ = [10,20,30, 50, 100]
+        n_max_ = [100]
         legend = ["VOTING","SWITCH"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
         legend_gt = ["Ground Truth"]
         
-        for rho in [0.02]:
-            for prec in [0.7, 0.8, 0.95]:
-                for cov in [20./n_items]:
-                    data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
-                    (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
-                    voting_results = {}
-                    #switch_results = {}
-                    for i in range(len(w_range)):
-                        voting_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
-                        switch_results[w_range[i]] = (Y_[i][0][1], Y_[i][1][1])
+        with concurrent.futures.ProcessPoolExecutor() as executor:
+            batch_jobs = dict()
+            for rho in [0.01, 0.02, 0.03]:
+                for prec in [0.7, 0.8, 0.9]:
+                    for cov in [20./n_items]:
+                        # VOTING and SWITCH
+                        data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
+                        gt_list_ = [gt for i in range(len(est_list))]
+                        batch_jobs[executor.submit(holdout_workers, data, gt_list_, w_range, est_list, rep=n_rep)] = (rho,prec,cov,gt)
 
-                    avg_ = {}
-                    std_ = {}
-                    for n_max in n_max_:
-                        est_ = []
-                        for i in range(n_rep):
-                            est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, 
-                                                                       n_max=n_max, w_coverage=cov, w_precision=prec)
-                            est_.append([est_dict[w] for w in w_range])
-                        avg_[n_max] = np.mean(est_, axis=0)
-                        std_[n_max] = np.std(est_, axis=0)
+            for job in concurrent.futures.as_completed(batch_jobs):
+                tag_ = batch_jobs[job]
+                if job.cancelled():
+                    print('Job %s cancelled'%(job))
+                elif job.done():
+                    error = job.exception()
+                    if error:
+                        print('Job with parameters %s returned an error: %s'%(tag_, error))
+                    else:
+                        (X_, Y_, GT_) = job.result()
+                        voting_results = {}
+                        switch_results = {}
+                        for i in range(len(w_range)):
+                            voting_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
+                            switch_results[w_range[i]] = (Y_[i][0][1], Y_[i][1][1])
 
-                    X, Y, GT = [], [], []
-                    for i in range(len(w_range)):
-                        X.append(w_range[i])
-                        Y.append( [ [voting_results[w_range[i]][0], 
-                                     switch_results[w_range[i]][0],
-                                     ] + [avg_[n_max][i] for n_max in n_max_], 
-                                    [voting_results[w_range[i]][1], 
-                                     switch_results[w_range[i]][1],
-                                    ] + [std_[n_max][i] for n_max in n_max_] ] )
-                        GT.append([gt])
+                        # T-WALK
+                        rho, prec, cov, gt = tag_
+                        avg_ = {}
+                        std_ = {}
+                        for n_max in n_max_:
+                            est_ = []
+                            for i in range(n_rep):
+                                est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, 
+                                                                           n_max=n_max, w_coverage=cov, w_precision=prec)
+                                est_.append([est_dict[w] for w in w_range])
+                            avg_[n_max] = np.mean(est_, axis=0)
+                            std_[n_max] = np.std(est_, axis=0)
 
-                    plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
-                             xaxis='Tasks', yaxis='# Error Estimate', 
-                             xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
-                             filename = 'figure/test_simulated_with_tri_walk_c%s_r%s_q%s.png'%(cov,rho,prec))
+                        X, Y, GT = [], [], []
+                        for i in range(len(w_range)):
+                            X.append(w_range[i])
+                            Y.append( [ [voting_results[w_range[i]][0], 
+                                         switch_results[w_range[i]][0],
+                                         ] + [avg_[n_max][i] for n_max in n_max_], 
+                                        [voting_results[w_range[i]][1], 
+                                         switch_results[w_range[i]][1],
+                                        ] + [std_[n_max][i] for n_max in n_max_] ] )
+                            GT.append([gt])
 
+                        pickle.dump((X,Y,GT), open('log/twalk_simul_%s_%s_%s.p'%(rho,prec,cov),'wb'))
+                        (X,Y,GT) = pickle.load(open('log/twalk_simul_%s_%s_%s.p'%(rho,prec,cov),'rb'))
 
-    def test_estimators2(self):
+                        plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
+                                 xaxis='Tasks', yaxis='# Error Estimate', 
+                                 xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
+                                 filename = 'figure/test_simulated_with_tri_walk_c%s_r%s_q%s.png'%(cov,rho,prec))
+
+    def test_triangular_walks(self):
         n_items = 1000
         init = 200
-        n_workers = 4000
-        step = 400
+        n_workers = 1200
+        step = 200
         w_range = range(init, n_workers, step)
-        n_rep = 30
+        n_rep = 50
 
         est_list = [vNominal]
         gt_list = [lambda x: gt]
-        n_max_ = [10,20,30, 50, 100]
+        n_max_ = [100]
         legend = ["VOTING"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
         legend_gt = ["Ground Truth"]
         
-        for rho in [0.02]:
-            for prec in [0.7, 0.8, 0.95]:
+        for rho in [0.01,0.02,0.03]:
+            for prec in [0.7, 0.8, 0.9]:
                 for cov in [20./n_items]:
                     data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
                     (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
@@ -169,6 +186,7 @@ class DQMTest(unittest.TestCase):
                              xaxis='Tasks', yaxis='# Error Estimate', 
                              xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
                              filename = 'figure/test_simulated_with_tri_walk2_c%s_r%s_q%s.png'%(cov,rho,prec))
+                    print (rho, prec, cov, std_[n_max])
 
     def test_robustness_to_fp_fn(self):
         n_items = 1000

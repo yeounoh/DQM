@@ -4,36 +4,6 @@ import matplotlib.pyplot as plt
 import math, random, csv, pickle
 from estimator import *
 
-def simulated_data2(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, fpr=0.01, fnr=0.1, uniform_asgn=False):
-    ''' Take a random subset of data and assign it (task) to a random worker '''
-    ''' There are some overlaps, which enables error prediction. '''
-    # Prepare ground truth labels
-    label = np.zeros(n_items)
-    label[range(int(n_items*rho))] = 1
-    random.shuffle(label)
-
-    data = np.zeros((n_items, n_workers))-1
-    for w in range(n_workers):
-        items = np.random.choice(n_items, int(n_items*w_coverage))
-        if uniform_asgn:
-            # Uniformly assign items to workers (i.e., each item gets
-            # the same number of workers).
-            n_task = int(n_items*w_coverage)
-            start = (w*n_task)%n_items
-            end = ((w+1)*n_task)%n_items
-            if end == 0:
-                end = n_items
-            items = range(start, end)
-        
-        for i in items:
-            if (random.random() > fpr and label[i] == 0) or (random.random() > fnr and label[i] == 1):
-                data[i,w] = label[i]
-            else:
-                data[i,w] = (label[i]+1)%2
-
-    ground_truth = np.sum(label)
-
-    return data, ground_truth
 
 def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
     ''' Take a random subset of data and assign it (task) to a random worker '''
@@ -66,19 +36,23 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
 
     return data, ground_truth
 
-def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.2, w_coverage=0.02, w_precision=0.8, sequential=True):
+def simulation_with_triangular_walk(n_items=1000, n_workers=100, 
+                                    n_max=30, rho=0.2, w_coverage=0.02, w_precision=0.8, 
+                                    sequential=True):
+    # Ground truth data generation
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
     random.shuffle(label)
     
-    data = {}
-    for i in range(len(label)):
+    data = {} # dataset with 
+    for i in range(n_items):
         data[i] = (label[i], 0., 0.) # (label, n, k)
     
     completed = set()
     estimates = dict()
     linear_estimates = list()
 
+    # First fixed batch of items
     items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
     n_workers_ = n_workers
     while n_workers_ > 0:
@@ -86,6 +60,7 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
             l_ = data[i][0]
             n_ = data[i][1] + 1.
             k_ = data[i][2] 
+
             if l_ == 0 and random.random() > w_precision:
                 k_ += 1.
             elif l_ == 1 and random.random() <= w_precision:
@@ -115,83 +90,14 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100, n_max=5, rho=0.
         # sample with replacement
         if sequential:
             items = [i for i in items if i not in completed]
-            items += list(np.random.choice(n_items, len(results)))
+            items += list(np.random.choice(n_items, len(completed)))
         else:
             items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
                 
         n_workers_ -= 1
-        results = {}
+        completed = set()
 
     return estimates
-
-def simulation_with_triangular_walk2(n_items=1000, n_workers=100, n_max=5, rho=0.2, w_coverage=0.02, fpr=0.01, fnr=0.1, sequential=True):
-    label = np.zeros(n_items)
-    label[range(int(n_items*rho))] = 1
-    random.shuffle(label)
-    
-    data = {}
-    for i in range(len(label)):
-        data[i] = (label[i], 0, 0, False) # (label, n, k, is_done)
-    
-    completed = set()
-    estimates = dict()
-    linear_estimates = []
-
-    items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
-    n_workers_ = n_workers
-    while n_workers_ > 0:
-        for i in items:
-            if i in results:
-                continue
-
-            l_ = data[i][0]
-            n_ = data[i][1] + 1
-            k_ = data[i][2] 
-            if l_ == 0 and random.random() <= fpr:
-                k_ += 1
-            elif l_ == 1 and random.random() > fnr:
-                k_ += 1
-
-
-            # check for stopping conditions
-            is_done = False
-            if n_ == n_max and float(k_)/float(n_) >= 0.5:
-                try:
-                    p_ = (2*k_ +n_ -2 + math.sqrt( 4*k_**2 -4*k_*n_ + n_**2 -4*n_ +4) )/(4.*n_-4)
-                    completed.add(i)            
-                    linear_estimates.append(1./(2*p_-1)) 
-                except ValueError:
-                    completed.add(i)
-                    linear_estimates.append((2*k_ +n_ -2)/(4.*n_-4))
-                is_done = True
-            elif (n_ == 1 and k_ == 0) or (n_ % 2 == 0 and k_ == n_/2):
-                results[i] = 0.
-                linear_estimates.append(0.)
-                is_done = True
-
-            if not is_done:
-                data[i] = (l_, n_, k_, is_done)
-            else: 
-                # reset because we allow sample with replacement and re-walk.
-                data[i] = (l_, 0, 0, False)
-            
-
-        #estimates[n_workers] = np.mean(results.values()) * n_items
-        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
-
-        # update batch (items): replace items with completed triangles
-        # sample with replacement
-        if sequential:
-            items = [i for i in items if i not in results.keys()]
-            items += list(np.random.choice(n_items, len(results)))
-        else:
-            items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
-                
-        n_workers_ -= 1
-        results = {}
-
-    return estimates
-
     
 
 def restaurant_data(filename, priotization=True, wq_assurance=True):
@@ -286,8 +192,8 @@ def restaurant_data(filename, priotization=True, wq_assurance=True):
                             task_resp[task].append(tup)
                     else:
                         task_resp[task] = [tup]
-        print '#workers:',len(worker_resp), '#tasks:',len(task_resp)
-    print 'worker_resp loaded'
+        print ('#workers:',len(worker_resp), '#tasks:',len(task_resp))
+    print ('worker_resp loaded')
 
     # worker evaluation
     score = []
@@ -305,7 +211,7 @@ def restaurant_data(filename, priotization=True, wq_assurance=True):
         if wq_assurance and score[-1] < 0.6:
             worker_resp.pop(w)
     score = np.array(score)
-    print '#bad workers:',np.sum(score < 0.6)
+    print ('#bad workers:',np.sum(score < 0.6))
 
     ilist_workers = worker_resp.keys()
     ilist_tasks = task_resp.keys()
@@ -315,7 +221,7 @@ def restaurant_data(filename, priotization=True, wq_assurance=True):
         lookup_tbl[ilist_pairs[i]] = i
 
     data = np.zeros((len(ilist_pairs),len(ilist_workers))) + -1
-    print '#pairs: ', len(ilist_pairs), '#workers: ', len(ilist_workers)
+    print ('#pairs: ', len(ilist_pairs), '#workers: ', len(ilist_workers))
     
     
     for k,v in worker_resp.iteritems():
@@ -328,7 +234,7 @@ def restaurant_data(filename, priotization=True, wq_assurance=True):
 
     return data, np.sum(pair_solution.values())    
 
-def holdout_workers(bdataset, gt_list, worker_range, est_list,rel_err=False, rep=1):
+def holdout_workers(bdataset, gt_list, worker_range, est_list, rel_err=False, rep=1):
     X = []
     Y = []
     GT = []
@@ -339,11 +245,14 @@ def holdout_workers(bdataset, gt_list, worker_range, est_list,rel_err=False, rep
             dataset = bdataset[:,np.random.choice(range(len(bdataset[0])),min(w,len(bdataset[0])),replace=False)]
             for e in est_list:
                 # ground truth ( len(est_list) == len(gt_list) )
-                A = float(gt_list[est_list.index(e)](dataset))
+                A = gt_list[est_list.index(e)]
+                if callable(A):
+                    A = float(gt_list[est_list.index(e)](dataset))
+                else:
+                    A = float(A)
                 random_trial[len(est_list) + est_list.index(e),t] = A
 
-                if rel_err:
-                    # SRMSE
+                if rel_err: #SRMSE
                     random_trial[est_list.index(e),t] = (e(dataset)-A)**2 / A**2
                 else:
                     random_trial[est_list.index(e),t] = e(dataset)
