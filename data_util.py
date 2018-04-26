@@ -1,3 +1,10 @@
+"""
+    Data Quality Metric simulation/utility functions.
+    
+    (Developed in Python 2.7)
+    
+    Author: yeounoh chung (yeounohster@gmail.com)
+"""
 import numpy as np
 import pylab as P
 import matplotlib.pyplot as plt
@@ -5,9 +12,18 @@ import math, random, csv, pickle
 from estimator import *
 
 
-def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, uniform_asgn=False):
-    ''' Take a random subset of data and assign it (task) to a random worker '''
-    ''' There are some overlaps, which enables error prediction. '''
+"""
+    Simulated datasets.
+"""
+
+def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_precision=0.8, 
+                   uniform_asgn=False):
+    ''' 
+        Take a random subset of data and assign it (task) to a random worker;
+        this is embarassingly parallel and is used by SWITCH and VOTING 
+        or most crowdsourced cleaning algorithms.
+    '''
+
     # Prepare ground truth labels
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
@@ -36,9 +52,15 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
 
     return data, ground_truth
 
-def simulation_with_triangular_walk(n_items=1000, n_workers=100, 
-                                    n_max=30, rho=0.2, w_coverage=0.02, w_precision=0.8, 
-                                    sequential=True):
+def simulation_with_triangular_walk(n_items=1000, n_workers=1000, 
+                                    n_max=100, rho=0.02, w_coverage=0.02, w_precision=0.8):
+    '''
+        Simulate the sequential sampling procedure for triangular walks; that is, 
+        we start with a single random batch and assign it to a number of random workers;
+        we replace any items in the batch with completed triangles at random with
+        replacement. 
+    '''
+
     # Ground truth data generation
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
@@ -48,12 +70,14 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100,
     for i in range(n_items):
         data[i] = (label[i], 0., 0.) # (label, n, k)
     
-    completed = set()
-    estimates = dict()
+    completed = set() # keeps track of completed triangles for batch item replacement
+    estimates = dict() # estimates[n_worker_] = #error_estimate
     linear_estimates = list()
 
-    # First fixed batch of items
+    # The first random batch of items
     items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+
+    # Triangular walks over the batch, with a total of n_workers/tasks
     n_workers_ = n_workers
     while n_workers_ > 0:
         for i in items:
@@ -83,22 +107,87 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=100,
                 # reset because we allow sample with replacement and re-walk.
                 data[i] = (l_, 0., 0.)
             
-        #estimates[n_workers] = np.mean(results.values()) * n_items
-        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items
+        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
 
         # update batch (items): replace items with completed triangles
         # sample with replacement
-        if sequential:
-            items = [i for i in items if i not in completed]
-            items += list(np.random.choice(n_items, len(completed)))
-        else:
-            items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+        items = [i for i in items if i not in completed]
+        items += list(np.random.choice(n_items, len(completed)))
                 
         n_workers_ -= 1
         completed = set()
 
     return estimates
     
+
+def simulation_with_parallel_triangular_walk(k, n_items=1000, n_workers=1000, 
+                                    n_max=100, rho=0.02, w_coverage=0.02, w_precision=0.8):
+    '''
+        Simulate the parallel sampling procedure for triangular walks; that is, 
+        we start with k random batches. The rest is similar to the sequential simulation.
+    '''
+
+    # Ground truth data generation
+    label = np.zeros(n_items)
+    label[range(int(n_items*rho))] = 1
+    random.shuffle(label)
+    
+    data = {} # dataset with 
+    for i in range(n_items):
+        data[i] = (label[i], 0., 0.) # (label, n, k)
+    
+    completed = set() # keeps track of completed triangles for batch item replacement
+    estimates = dict() # estimates[n_worker_] = #error_estimate
+    linear_estimates = list()
+
+    # The first random batch of items
+    items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+
+    # Triangular walks over the batch, with a total of n_workers/tasks
+    n_workers_ = n_workers
+    while n_workers_ > 0:
+        for i in items:
+            l_ = data[i][0]
+            n_ = data[i][1] + 1.
+            k_ = data[i][2] 
+
+            if l_ == 0 and random.random() > w_precision:
+                k_ += 1.
+            elif l_ == 1 and random.random() <= w_precision:
+                k_ += 1.
+
+            # check for stopping conditions
+            if n_ < n_max and k_/n_ > 0.5:
+                data[i] = (l_, n_, k_)
+            else:
+                completed.add(i)
+                if k_/n_ <= 0.5:
+                    linear_estimates.append(0.)
+                else:
+                    if (2-n_max-2*k_)**2 -4*(2*n_max-2)*k_ >= 0:
+                        p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
+                    else:
+                        p_ = ((2.*k_+n_max-2)/(4*n_max-4))
+                    linear_estimates.append(1./(2*p_-1.))
+
+                # reset because we allow sample with replacement and re-walk.
+                data[i] = (l_, 0., 0.)
+            
+        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
+
+        # update batch (items): replace items with completed triangles
+        # sample with replacement
+        items = [i for i in items if i not in completed]
+        items += list(np.random.choice(n_items, len(completed)))
+                
+        n_workers_ -= 1
+        completed = set()
+
+    return estimates
+
+"""
+    Real-world datasets
+"""
 
 def restaurant_data(filename, priotization=True, wq_assurance=True):
     base_table = 'dataset/restaurant.csv'
@@ -234,7 +323,13 @@ def restaurant_data(filename, priotization=True, wq_assurance=True):
 
     return data, np.sum(pair_solution.values())    
 
-def holdout_workers(bdataset, gt_list, worker_range, est_list, rel_err=False, rep=1):
+
+"""
+    Utility functions
+"""
+
+def holdout_workers(bdataset, gt_list, worker_range, est_list, 
+                    rel_err=False, rep=1):
     X = []
     Y = []
     GT = []
@@ -242,7 +337,9 @@ def holdout_workers(bdataset, gt_list, worker_range, est_list, rel_err=False, re
     for w in worker_range:
         random_trial = np.zeros((len(est_list)+len(gt_list),rep))
         for t in range(0,rep):
-            dataset = bdataset[:,np.random.choice(range(len(bdataset[0])),min(w,len(bdataset[0])),replace=False)]
+            dataset = bdataset[:,
+                               np.random.choice(range(len(bdataset[0])),
+                                                min(w,len(bdataset[0])),replace=False)]
             for e in est_list:
                 # ground truth ( len(est_list) == len(gt_list) )
                 A = gt_list[est_list.index(e)]
@@ -260,7 +357,7 @@ def holdout_workers(bdataset, gt_list, worker_range, est_list, rel_err=False, re
         result_array = []
         var_array = []
         if rel_err:
-            result_array = np.sqrt(np.mean(random_trial[0:len(est_list),:],axis=1)) #take median, not mean
+            result_array = np.sqrt(np.mean(random_trial[0:len(est_list),:],axis=1))
             var_array = np.std(random_trial[0:len(est_list),:],axis=1)
         else:
             result_array = np.mean(random_trial[0:len(est_list),:],axis=1)
@@ -288,8 +385,7 @@ def plotY1Y2(points,
              filename="output.png",
              logscale=False,
              rel_err=False,
-             font=20,
-             ):
+             font=20):
     from matplotlib import font_manager, rcParams
     rcParams.update({'figure.autolayout': True})
     rcParams.update({'font.size': font})
@@ -323,13 +419,16 @@ def plotY1Y2(points,
         else:
             if not rel_err and 'EXTRAPOL' in legend[i]:
                 #ax.plot(points[0], np.zeros(len(points[0]))+res[0], '--',linewidth=1.5, color='g',label=legend[i]) 
-                ax.fill_between(points[0], res[0]-1*std[0], res[0]+1*std[0], alpha=0.3, edgecolor='#CC4F1B', facecolor='#FF9848')#,label=legend[i])
+                ax.fill_between(points[0], res[0]-1*std[0], res[0]+1*std[0], 
+                                alpha=0.3, edgecolor='#CC4F1B', facecolor='#FF9848')#,label=legend[i])
                 #ax.errorbar(points[0],np.zeros(len(points[0]))+res[0],yerr=std[0],linewidth=2.5,color='g',label=legend[i])
             else:
                 if rel_err:
-                    ax.plot(points[0], res, markers[i], linewidth=2.5,markersize=7,color=colors[i],label=legend[i])
+                    ax.plot(points[0], res, markers[i], 
+                            linewidth=2.5,markersize=7,color=colors[i],label=legend[i])
                 else:
-                    ax.errorbar(points[0], res, yerr=std, fmt=markers[i], linewidth=2,markersize=7,color=colors[i],label=legend[i])
+                    ax.errorbar(points[0], res, yerr=std, fmt=markers[i], 
+                                linewidth=2,markersize=7,color=colors[i],label=legend[i])
                 #for z in range(len(points[0])):
                 #    print legend[i], points[0][z], res[z]
 
@@ -355,6 +454,7 @@ def jaccard(a,b):
     word_set_b = set(b.lower().split())
     word_set_c = word_set_a.intersection(word_set_b)
     return float(len(word_set_c)) / (len(word_set_a) + len(word_set_b) - len(word_set_c))
+
 
 if __name__=="__main__":
         data, gt = restaurant_data(['dataset/good_worker/restaurant_additional.csv',
