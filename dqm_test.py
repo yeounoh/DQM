@@ -35,7 +35,8 @@ class DQMTest(unittest.TestCase):
                         # VOTING and SWITCH
                         data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
                         gt_list_ = [gt for i in range(len(est_list))]
-                        batch_jobs[executor.submit(holdout_workers, data, gt_list_, w_range, est_list, rep=n_rep)] = (rho,prec,cov,gt)
+                        batch_jobs[executor.submit(
+                                        holdout_workers, data, gt_list_, w_range, est_list, rep=n_rep)] = (rho,prec,cov,gt)
 
             for job in concurrent.futures.as_completed(batch_jobs):
                 tag_ = batch_jobs[job]
@@ -83,79 +84,31 @@ class DQMTest(unittest.TestCase):
                         plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                                  xaxis='Tasks', yaxis='# Error Estimate', 
                                  xmin = init, ymax=150, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
-                                 filename = 'figure/test_simulated_with_tri_walk_c%s_r%s_q%s.png'%(cov,rho,prec))
+                                 filename = 'figure/test_estimators_c%s_r%s_q%s.png'%(cov,rho,prec))
 
-    def test_parallel_triangular_walks(self):
-        ''' 
-            Test parallel trainagular walks,
-            and compare the results against sequential results
-        '''
-        n_items = 1000
-        init = 200
-        n_workers = 1200
-        step = 200
-        w_range = range(init, n_workers, step)
-        n_rep = 50
-
-        est_list = [vNominal]
-        gt_list = [lambda x: gt]
-        n_max_ = [100]
-        legend = ["VOTING"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
-        legend_gt = ["Ground Truth"]
-        
-        for rho in [0.01,0.02,0.03]:
-            for prec in [0.7, 0.8, 0.9]:
-                for cov in [20./n_items]:
-                    data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
-                    (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
-                    voting_results = {}
-                    for i in range(len(w_range)):
-                        voting_results[w_range[i]] = (Y_[i][0][0], Y_[i][1][0])
-
-                    avg_ = {}
-                    std_ = {}
-                    for n_max in n_max_:
-                        est_ = []
-                        for i in range(n_rep):
-                            est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, 
-                                                                       n_max=n_max, w_coverage=cov, w_precision=prec)
-                            est_.append([est_dict[w] for w in w_range])
-                        avg_[n_max] = np.mean(est_, axis=0)
-                        std_[n_max] = np.std(est_, axis=0)
-
-                    X, Y, GT = [], [], []
-                    for i in range(len(w_range)):
-                        X.append(w_range[i])
-                        Y.append( [ [voting_results[w_range[i]][0], 
-                                     ] + [avg_[n_max][i] for n_max in n_max_], 
-                                    [voting_results[w_range[i]][1], 
-                                    ] + [std_[n_max][i] for n_max in n_max_] ] )
-                        GT.append([gt])
-
-                    plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
-                             xaxis='Tasks', yaxis='# Error Estimate', 
-                             xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
-                             filename = 'figure/test_simulated_with_tri_walk2_c%s_r%s_q%s.png'%(cov,rho,prec))
-                    print (rho, prec, cov, std_[n_max])
 
     def test_triangular_walks(self):
-        ''' Test sequential triangular walks '''
+        ''' 
+            Test sequential/parallel triangular walks 
+        '''
 
         n_items = 1000
         init = 200
-        n_workers = 1200
-        step = 200
+        n_workers = 10000
+        step = 400
         w_range = range(init, n_workers, step)
-        n_rep = 50
+        n_rep = 30
 
         est_list = [vNominal]
         gt_list = [lambda x: gt]
-        n_max_ = [100]
-        legend = ["VOTING"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
+        n_max_ = [30, 100]
+        n_batch_ = [1, 10, n_workers]
+        legend = (["VOTING"] #+ ["T-WALK(%s)"%n_max for n_max in n_max_seq] 
+                            + ["%s T-WALK(%s)"%(n_batch,n_max) for n_batch in n_batch_ for n_max in n_max_])
         legend_gt = ["Ground Truth"]
         
-        for rho in [0.01,0.02,0.03]:
-            for prec in [0.7, 0.8, 0.9]:
+        for rho in [0.02]:
+            for prec in [0.7]:
                 for cov in [20./n_items]:
                     data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
                     (X_, Y_, GT_) = holdout_workers(data, gt_list, w_range, est_list, rep=n_rep)
@@ -165,29 +118,30 @@ class DQMTest(unittest.TestCase):
 
                     avg_ = {}
                     std_ = {}
-                    for n_max in n_max_:
-                        est_ = []
-                        for i in range(n_rep):
-                            est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, 
-                                                                       n_max=n_max, w_coverage=cov, w_precision=prec)
-                            est_.append([est_dict[w] for w in w_range])
-                        avg_[n_max] = np.mean(est_, axis=0)
-                        std_[n_max] = np.std(est_, axis=0)
+                    for n_batch in n_batch_:
+                        for n_max in n_max_:
+                            est_ = []
+                            for i in range(n_rep):
+                                est_dict = simulation_with_parallel_triangular_walk(n_batch,
+                                                        n_items=n_items, rho=rho, n_workers=n_workers, 
+                                                        n_max=n_max, w_coverage=cov, w_precision=prec)
+                                est_.append([est_dict[w] for w in w_range])
+                            avg_[(n_batch,n_max)] = np.mean(est_, axis=0)
+                            std_[(n_batch,n_max)] = np.std(est_, axis=0)
 
                     X, Y, GT = [], [], []
                     for i in range(len(w_range)):
                         X.append(w_range[i])
                         Y.append( [ [voting_results[w_range[i]][0], 
-                                     ] + [avg_[n_max][i] for n_max in n_max_], 
+                                     ] + [avg_[(n_batch,n_max)][i] for n_batch in n_batch_ for n_max in n_max_], 
                                     [voting_results[w_range[i]][1], 
-                                    ] + [std_[n_max][i] for n_max in n_max_] ] )
+                                    ] + [std_[(n_batch,n_max)][i] for n_batch in n_batch_ for n_max in n_max_] ] )
                         GT.append([gt])
 
-                    plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
+                    plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,font=15,
                              xaxis='Tasks', yaxis='# Error Estimate', 
-                             xmin = init, ymax=200, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
-                             filename = 'figure/test_simulated_with_tri_walk2_c%s_r%s_q%s.png'%(cov,rho,prec))
-                    print (rho, prec, cov, std_[n_max])
+                             xmin = init, ymax=100, loc='best', title='batch-size:%sx%s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
+                             filename = 'figure/test_triangular_walks_c%s_r%s_q%s.png'%(cov,rho,prec))
 
     def test_robustness_to_fp_fn(self):
         n_items = 1000
@@ -299,7 +253,7 @@ class DQMTest(unittest.TestCase):
             plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                      xaxis='Tasks', yaxis='# Errors',
                      ymax=50, xmin=200, loc='best', title='Worker quality: %s'%str(w_q),
-                     filename='figure/test_estimators_r%s_c%s_q%s.png'%(rho,w_c,w_q))
+                     filename='figure/test_estimators__r%s_c%s_q%s.png'%(rho,w_c,w_q))
 
 if __name__ == '__main__':
     unittest.main()

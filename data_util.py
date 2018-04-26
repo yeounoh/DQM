@@ -107,7 +107,8 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=1000,
                 # reset because we allow sample with replacement and re-walk.
                 data[i] = (l_, 0., 0.)
             
-        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
+        if len(linear_estimates) > 0:
+            estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
 
         # update batch (items): replace items with completed triangles
         # sample with replacement
@@ -126,6 +127,7 @@ def simulation_with_parallel_triangular_walk(k, n_items=1000, n_workers=1000,
         Simulate the parallel sampling procedure for triangular walks; that is, 
         we start with k random batches. The rest is similar to the sequential simulation.
     '''
+    assert isinstance(k, (int, long))
 
     # Ground truth data generation
     label = np.zeros(n_items)
@@ -140,12 +142,19 @@ def simulation_with_parallel_triangular_walk(k, n_items=1000, n_workers=1000,
     estimates = dict() # estimates[n_worker_] = #error_estimate
     linear_estimates = list()
 
-    # The first random batch of items
-    items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
-
-    # Triangular walks over the batch, with a total of n_workers/tasks
+    # k batches
+    batches = []
+    for i in range(k):
+        items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+        batches.append(items)
+       
+    # Triangular walks over the k batches, with a total of n_workers/tasks
+    # We need to keep track of tiangles indexed by item indices
+    # so to aggregate all votes on the same item/triangle across multiple batches.
     n_workers_ = n_workers
     while n_workers_ > 0:
+        batch_idx = random.randint(0,k-1)
+        items = batches[batch_idx]
         for i in items:
             l_ = data[i][0]
             n_ = data[i][1] + 1.
@@ -173,12 +182,14 @@ def simulation_with_parallel_triangular_walk(k, n_items=1000, n_workers=1000,
                 # reset because we allow sample with replacement and re-walk.
                 data[i] = (l_, 0., 0.)
             
-        estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
+        if len(linear_estimates) > 0:
+            estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
 
         # update batch (items): replace items with completed triangles
         # sample with replacement
         items = [i for i in items if i not in completed]
         items += list(np.random.choice(n_items, len(completed)))
+        batches[batch_idx] = items
                 
         n_workers_ -= 1
         completed = set()
