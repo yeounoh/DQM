@@ -9,7 +9,7 @@ import numpy as np
 import pylab as P
 import matplotlib.pyplot as plt
 import math, random, csv, pickle
-from estimator import *
+#from estimator import *
 
 
 """
@@ -53,37 +53,46 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
     return data, ground_truth
 
 def simulation_with_triangular_walk(n_items=1000, n_workers=1000, 
-                                    n_max=100, rho=0.02, w_coverage=0.02, w_precision=0.8):
+                                    n_max=50, rho=0.02, w_coverage=0.02, w_precision=0.8):
     '''
-        Simulate the sequential sampling procedure for triangular walks; that is, 
-        we start with a single random batch and assign it to a number of random workers;
-        we replace any items in the batch with completed triangles at random with
-        replacement. 
+        Simulate the sequential sampling procedure for triangular walks; we run n_items*w_coverage many
+        parallel sequential sampling algorithms, and at each point we compute estimates for each of the
+        algorithms (by default 20 of them), then average over them.
+        Note that this is different from pooling all the linear estimates from the algorithms together and
+        averaging.
+        The latter turns out introduces a lot of statistical bias, whereas the current approach has negligible
+        bias (at most 1%)
+        For each of the algorithms, we keep running a single triangular walk until termination, put the linear
+        estimate into the algorithm's bag, and sample a new item for a walk.
+        As an anytime algorithm, we output the current estimate as the sample mean of all the estimates in that
+        single bag.
     '''
 
     # Ground truth data generation
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
     random.shuffle(label)
-    
-    data = {} # dataset with 
-    for i in range(n_items):
-        data[i] = (label[i], 0., 0.) # (label, n, k)
+
+    batch_size = int(round(n_items*w_coverage))
+    walks = {} # The current dict (keys: range(batch_size)) of batch_size many triangular walks in progress
     
     completed = set() # keeps track of completed triangles for batch item replacement
     estimates = dict() # estimates[n_worker_] = #error_estimate
-    linear_estimates = list()
+    linear_estimates = dict() # One bag of linear estimates per algorithm, of which there are batch_size many
 
-    # The first random batch of items
-    items = list(np.random.choice(n_items, int(n_items*w_coverage), replace=True))
+    # The first random batch of items and initialisation of linear estimate bags
+    for i in range(batch_size):
+        linear_estimates[i] = list()
+        walks[i] = (np.random.choice(n_items), 0., 0.)
 
     # Triangular walks over the batch, with a total of n_workers/tasks
     n_workers_ = n_workers
     while n_workers_ > 0:
-        for i in items:
-            l_ = data[i][0]
-            n_ = data[i][1] + 1.
-            k_ = data[i][2] 
+        for i in range(batch_size):
+            item = walks[i][0]
+            l_ = label[item]
+            n_ = walks[i][1] + 1.
+            k_ = walks[i][2]
 
             if l_ == 0 and random.random() > w_precision:
                 k_ += 1.
@@ -92,32 +101,37 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=1000,
 
             # check for stopping conditions
             if n_ < n_max and k_/n_ > 0.5:
-                data[i] = (l_, n_, k_)
+                walks[i] = (walks[i][0], n_, k_)
             else:
                 completed.add(i)
                 if k_/n_ <= 0.5:
-                    linear_estimates.append(0.)
+                    linear_estimates[i].append(0.)
                 else:
                     if (2-n_max-2*k_)**2 -4*(2*n_max-2)*k_ >= 0:
                         p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
                     else:
                         p_ = ((2.*k_+n_max-2)/(4*n_max-4))
-                    linear_estimates.append(1./(2*p_-1.))
+                    #p_ = k_/n_max
+                    #print 1./(2*p_-1.)
+                    p_ = max(p_, 0.6)
+                    linear_estimates[i].append(1./(2*p_-1.) - 0.165*p_*(1-p_)/(2*p_ - 1)**2)
 
-                # reset because we allow sample with replacement and re-walk.
-                data[i] = (l_, 0., 0.)
+        for i in completed:
+            # reset because we allow sample with replacement and re-walk.
+            walks[i] = (np.random.choice(n_items), 0., 0.)
             
-        if len(linear_estimates) > 0:
-            estimates[n_workers-n_workers_+1] = np.mean(linear_estimates) * n_items # #error_estimate
+        cur_estimates = list()
 
-        # update batch (items): replace items with completed triangles
-        # sample with replacement
-        items = [i for i in items if i not in completed]
-        items += list(np.random.choice(n_items, len(completed)))
+        for i in range(batch_size):
+            if len(linear_estimates[i]) > 0:
+                cur_estimates.append(np.mean(linear_estimates[i]))
+        
+        if len(cur_estimates) > 0:
+            estimates[n_workers-n_workers_+1] = np.mean(cur_estimates) * n_items
                 
         n_workers_ -= 1
         completed = set()
-
+        
     return estimates
     
 
@@ -195,6 +209,85 @@ def simulation_with_parallel_triangular_walk(k, n_items=1000, n_workers=1000,
         completed = set()
 
     return estimates
+
+
+def simulate_triangular_walk_by_triangles(n_items=1000, n_triangles=20000, 
+                                    n_max=100, rho=0.02, w_coverage=0.02, w_precision=0.8, w_range=range(20000)):
+    '''
+        Simulate triangular walks measured by the number of tasks. 
+    '''
+
+    # Ground truth data generation
+    label = np.zeros(n_items)
+    label[range(int(n_items*rho))] = 1
+    random.shuffle(label)
+    
+    walks = {} # dataset with 
+               #walks[i] = (item_id, n, k, walk_id)
+    
+    completed = set() # keeps track of completed triangles for batch item replacement
+    estimates = dict() # estimates[n_worker_] = #error_estimate
+    results = dict() # for each walk_id, results[walk_id] is the output of the triangular walk with that id
+    n_tasks = dict() # for each walk id, n_tasks[walk_id] stores the number of tasks it took to complete all triangles before and including walk_id
+    id = 0
+
+    # The first random batch of items
+    #items = list(np.random.choice(n_items, int(n_items*w_coverage)))
+    batch_size = int(round(n_items*w_coverage))
+    for i in range(batch_size):
+        walks[i] = (np.random.choice(n_items), 0., 0., id)
+        id = id + 1
+
+    # Triangular walks over the batch, with a total of n_workers/tasks
+    n_workers_ = 0
+    triangles_left = n_triangles
+    while triangles_left > 0:
+        n_workers_ = n_workers_ + 1
+        for i in range(batch_size):
+            item = walks[i][0]
+            l_ = label[item]
+            n_ = walks[i][1] + 1.
+            k_ = walks[i][2]
+            this_id = walks[i][3]
+
+            if l_ == 0 and random.random() > w_precision:
+                k_ += 1.
+            elif l_ == 1 and random.random() <= w_precision:
+                k_ += 1.
+
+            # check for stopping conditions
+            if n_ < n_max and k_/n_ > 0.5:
+                walks[i] = (item, n_, k_, this_id)
+            else:
+                completed.add(i)
+                if k_/n_ <= 0.5:
+                    results[this_id] = 0.
+                else:
+                    if (2-n_max-2*k_)**2 -4*(2*n_max-2)*k_ >= 0:
+                        p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
+                    else:
+                        p_ = ((2.*k_+n_max-2)/(4*n_max-4))
+                    results[this_id] = 1./(2*p_-1.)
+
+        for i in completed:
+            # reset because we allow sample with replacement and re-walk.
+            n_tasks[walks[i][3]] = n_workers_ # only storing when this walk finished, need to take max later
+            if walks[i][3] < n_triangles:
+                triangles_left = triangles_left - 1
+            walks[i] = (np.random.choice(n_items), 0., 0., id)
+            id = id + 1
+                
+        completed = set()
+
+    cur_n_tasks = 0
+    cur_avg = 0
+    for i in range(n_triangles):
+        cur_n_tasks = max(n_tasks[i], cur_n_tasks)
+        n_tasks[i] = cur_n_tasks
+        cur_avg = cur_avg + (results[i] - cur_avg)/(i+1)
+        estimates[i] = cur_avg * n_items
+
+    return [estimates[w] for w in w_range], [n_tasks[w] for w in w_range]
 
 """
     Real-world datasets
