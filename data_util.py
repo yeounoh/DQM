@@ -292,7 +292,6 @@ def simulate_triangular_walk_by_triangles(n_items=1000, n_triangles=20000,
 """
     Real-world datasets
 """
-
 def restaurant_data(filename, priotization=True, wq_assurance=True):
     base_table = 'dataset/restaurant.csv'
     hard_pairs_ = pickle.load( open('dataset/hard_pairs.p','rb') )

@@ -1,0 +1,9 @@
+{
+  "title": "Restaurant addresses de-duplication",
+  "description": "Check if the two addresses point to the same restaurant (see instructions).",
+  "keywords": "restaurant,address,entity resolution,deduplication",
+  "reward": 0.04,
+  "duration": 400,
+  "frame_height": 20000,
+  "max_assignments": 1
+}

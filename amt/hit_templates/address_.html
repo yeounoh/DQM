@@ -1,0 +1,156 @@
+<html>
+  <head>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+    <script src='//cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>
+    <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' rel='stylesheet'>    
+  </head>
+  <body>
+    <div class='row'>
+    <div class='col-xs-12 col-md-12'>
+    <div class='panel panel-primary'><!-- WARNING: the ids 'collapseTrigger' and 'instructionBody' are being used to enable expand/collapse feature --><a class='panel-heading' href='javascript:void(0);' id='collapseTrigger'><strong>Home Address in Oregon Verification Instructions</strong> <span class='collapse-text'>(Click to expand)</span> </a>
+    <div class='panel-body' id='instructionBody'>
+    <p>Verify the address below as a home address in Oregon, U.S.A.</p>
+    <ul>
+        <li>Indicate if the address (below) is a valid home address in Oregon, U.S.A. or not</li>
+        <li>Look at the address and provide ZIP code.</li>
+        <li>Provide the street number and name (e.g., 43 Kenyon St.).</li>
+        <li>Provide the home/apartment unit number (optional).</li>
+        <li><strong>A valid home adsdress</strong> should have street number and name, (optional) a unit number, and city (e.g., Portland), state (e.g., OR) and ZIP (e.g., 97007), in order.</li>
+        <li><strong>A valid home address</strong> should have a valid, exsiting address. That is, no faulty ZIP or street name should be used.</li>
+    </ul>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <div class='container'>
+      <h1>Home Addresses in Oregon Verification</h1>
+      <p><span class='address'></span></p>
+      <div><br></div>
+      <div class='form-group'><label for='field1'>ZIP code:</label> <input class='form-control' id='field1' name='field1' size='30' type='text' /></div>
+      <div><br></div>
+      <div class='form-group'><label for='field2'>Street number and name:</label> <input class='form-control' id='field2' name='field2' size='30' type='text' /></div>
+      <div><br></div>
+      <div class='form-group'><label for='field3'>(Optional) unit number:</label> <input class='form-control' id='field3' name='field3' size='30' type='text' /></div>
+      <div><br></div>
+      <div class='form-group'><label class='group-label'>Is the address valid?</label>
+        <div class='radio-inline'><label><input autocomplete='off' id='option1' name='isAddressValid' required='' type='radio' value='yes' /> Is valid </label></div>
+        <div class='radio-inline'><label><input autocomplete='off' id='option2' name='isAddressValid' required='' type='radio' value='no' /> Is NOT valid </label></div>
+      </div>
+    </div>
+
+    <style type='text/css'>#collapseTrigger{
+      color:#00F;
+      display: block;
+      text-decoration: none;
+    }
+    #submitButton{
+      white-space: normal;
+    }
+    .image{
+      margin-bottom: 15px; 
+    }
+    .group-label{
+      display: block;
+    }
+    .radio-inline>label{
+      font-weight: normal;
+    }
+    </style>
+
+    {% include 'hit_templates/simpleamt.html' %}
+
+    <script>
+      $(function() {
+
+        function main() {
+          // Define default input to be used when developing this HIT.
+          var DEFAULT_INPUT = { address: '16920 Southwest Barrows Road Portland, OR 97007' };
+
+          var input = simpleamt.getInput(DEFAULT_INPUT);
+          #('span.address').text(input.address);
+
+          // If the HIT is not in preview mode, then we need to enable the UI
+          // and set up the logic for submitting.
+          if (!simpleamt.isPreview()) {
+            enable_ui();
+
+            // You need to call this in every HIT; if you forget then you will
+            // get an error message when you try and submit the HIT.
+            simpleamt.setupSubmit();
+
+            // Set up a click handler for the submit button.
+            // Typically this will validate user output and either submit the
+            // HIT if the data is good or show an error message to the user if
+            // the data is bad. If this click handler returns false then the
+            // HIT will not be submitted.
+            // WARNING: If the click handler throws an exception
+            // then by default the HIT will be submitted; this is a fertile
+            // source of bugs.
+            $('#submit-btn').click(function() {
+              // Read in the verification result.
+              var is_valid = '';
+              if (document.getElementById('option1').checked) {
+                is_valid = document.getElementById('option1').value;
+              }
+              elif (document.getElementById('option2').checked) {
+                is_valid = document.getElementById('option2').value;
+              }
+
+              // Construct an object containing the output of this assignment.
+              var output = {
+                zip: $('#field1').val(),
+                street: $('#field2').val(),
+                unit: $('#field3').val(),
+                is_valid: is_valid,
+              };
+
+              // Validate the output
+              if (output.zip.length < 5) {
+                alert('Need a valid ZIP code');
+                return false; }
+              if (output.street.length < 1) {
+                alert('Need a street address');
+                return false; }
+              if (output.is_valid.length < 1) {
+                alert('Please verify the address to submit');
+                return false; }
+              simpleamt.setOutput(output);
+            })
+          }
+        }
+
+        function enable_ui() {
+          // Enable the UI specific to our HIT.
+          $('#text-answer').prop('disabled', false);
+
+          // Enable the submit button. You must do this in every HIT.
+          $('#submit-btn').prop('disabled', false);
+        }
+
+        main();
+
+      });
+    </script>
+
+    <!-- External JS references --><script src='https://code.jquery.com/jquery-3.1.0.min.js'   integrity='sha256-cCueBR6CsyA4/9szpPfrX3s49M9vUU5BgtiJj06wt/s='   crossorigin='anonymous'></script><script src='https://maxcdn.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js' integrity='sha384-s1ITto93iSMDxlp/79qhWHi+LsIi9Gx6yL+cOKDuymvihkfol83TYbLbOw+W/wv4' crossorigin='anonymous'></script><!-- Open internal javascript --><script>
+  $(document).ready(function() {
+    // Instructions expand/collapse
+    var content = $('#instructionBody');
+    var trigger = $('#collapseTrigger');
+    content.hide();
+    $('.collapse-text').text('(Click to expand)');
+    trigger.click(function(){
+      content.toggle();
+      var isVisible = content.is(':visible');
+      if(isVisible){
+        $('.collapse-text').text('(Click to collapse)');
+      }else{
+        $('.collapse-text').text('(Click to expand)');
+      }
+    });
+    // end expand/collapse
+  });
+</script><!-- Close internal javascript -->
+  </body>
+</html>

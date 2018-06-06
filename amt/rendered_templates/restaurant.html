@@ -1,0 +1,495 @@
+
+    <html>
+      <head>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>
+        <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' rel='stylesheet'>    
+      </head>
+      <body>
+        <!-- Instructions -->
+        <div class='row'>
+        <div class='col-xs-12 col-md-12'>
+        <div class='panel panel-primary'><a class='panel-heading' href='javascript:void(0);' id='collapseTrigger'><strong>Home Address in Oregon Verification Instructions</strong></a>
+        <div class='panel-body' id='instructionBody'>
+        <p>Restaurant addresses de-duplication</p>
+        <ul>
+            <li>Check if the two addresses point to the same restaurant in CA.</li>
+            <li>Restaurant address records are in a form of 'name, address, city, food type':<br />e.g.) arnie morton's of chicago, 435 s. la cienega blv., los angeles, american 
+            <li> An example of two address records pointing to the same restaurant:<br />a)art's delicatessen, 12224 ventura blvd., studio city, american<br />b)art's deli, 12224 ventura blvd., studio city, delis
+            <li> An example of two address records not belonging to the same restaurant:<br />a)the palm, 9001 santa monica blvd., los angeles, american<br />b)patina, 5955 melrose ave., los angeles, californian
+        </ul>
+        </div>
+        </div>
+        </div>
+        </div>
+        <!-- End Instructions -->
+
+        <div class='container'>
+          <h1>10 Restaurant address records de-duplication</h1>
+
+          <p>PRACTICE 1)<br />Address 1) art's delicatessen, 12224 ventura blvd., studio city, american<br />Address 2) art's deli, 12224 ventura blvd., studio city, delis
+</p>
+          <div class='form-group'><label class='verify00'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v00_option1' name='isAddressValid00' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v00_option2' name='isAddressValid00' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>PRACTICE 2)<br />Address 1) the palm, 9001 santa monica blvd., los angeles, american<br />Address 2) patina, 5955 melrose ave., los angeles, californian
+</p>
+          <div class='form-group'><label class='verify01'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v01_option1' name='isAddressValid01' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v01_option2' name='isAddressValid01' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+        </div>
+
+        <div class='container'>
+          <p>Address 1) cafe bizou, 14016 ventura blvd., sherman oaks, french bistro<br /> Address 2) cafe marimba, 2317 chestnut st., san francisco, mexican/latin american/spanish</p>
+          <div class='form-group'><label class='verify1'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v1_option1' name='isAddressValid' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v1_option2' name='isAddressValid' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) sundown cafe, 2165 cheshire bridge rd., atlanta, american<br /> Address 2) coyote cafe, 3799 las vegas blvd. s, las vegas, southwestern</p>
+          <div class='form-group'><label class='verify2'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v2_option1' name='isAddressValid2' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v2_option2' name='isAddressValid2' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) hard rock cafe, 8600 beverly blvd., los angeles, american<br /> Address 2) plumpjack cafe, 3201 fillmore st., san francisco, mediterranean</p>
+          <div class='form-group'><label class='verify3'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v3_option1' name='isAddressValid3' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v3_option2' name='isAddressValid3' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) water club, 500 e. 30th st., new york, american<br /> Address 2) 21 club, 21 w. 52nd st., new york, american</p>
+          <div class='form-group'><label class='verify4'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v4_option1' name='isAddressValid4' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v4_option2' name='isAddressValid4' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) gramercy tavern, 42 e. 20th st., new york city, american (new)<br /> Address 2) fraunces tavern, 54 pearl st. at broad st., new york, american</p>
+          <div class='form-group'><label class='verify5'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v5_option1' name='isAddressValid5' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v5_option2' name='isAddressValid5' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) rainbow restaurant, 2118 n. decatur rd., decatur, vegetarian<br /> Address 2) rainbow room, 30 rockefeller plaza, new york city, american (new)</p>
+          <div class='form-group'><label class='verify6'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v6_option1' name='isAddressValid6' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v6_option2' name='isAddressValid6' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) park avenue cafe, 100 e. 63rd st., new york, american<br /> Address 2) brookhaven cafe, 4274 peachtree rd., atlanta, vegetarian</p>
+          <div class='form-group'><label class='verify7'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v7_option1' name='isAddressValid7' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v7_option2' name='isAddressValid7' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) cafe bizou, 14016 ventura blvd., sherman oaks, french<br /> Address 2) cafe fes, 246 w. 4th st. at charles st., new york, mediterranean</p>
+          <div class='form-group'><label class='verify8'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v8_option1' name='isAddressValid8' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v8_option2' name='isAddressValid8' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) white house restaurant, 3172 peachtree rd. ne, atlanta, diners<br /> Address 2) andre's french restaurant, 401 s. 6th st., las vegas, french (classic)</p>
+          <div class='form-group'><label class='verify9'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v9_option1' name='isAddressValid9' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v9_option2' name='isAddressValid9' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) indo cafe, 10428 1/2 national blvd., la, indonesian<br /> Address 2) hard rock cafe, 8600 beverly blvd., los angeles, american</p>
+          <div class='form-group'><label class='verify10'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v10_option1' name='isAddressValid10' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v10_option2' name='isAddressValid10' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) match, 160 mercer st.  between houston and prince sts., new york, american<br /> Address 2) marichu, 342 e. 46th st.  between 1st and 2nd aves., new york, french</p>
+          <div class='form-group'><label class='verify11'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v11_option1' name='isAddressValid11' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v11_option2' name='isAddressValid11' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) spago, 1114 horn ave., los angeles, californian<br /> Address 2) drago, 2628 wilshire blvd., santa monica, italian</p>
+          <div class='form-group'><label class='verify12'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v12_option1' name='isAddressValid12' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v12_option2' name='isAddressValid12' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) sylvia's, 328 lenox ave., new york city, southern/soul<br /> Address 2) yolie's, 3900 paradise rd., las vegas, steak houses</p>
+          <div class='form-group'><label class='verify13'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v13_option1' name='isAddressValid13' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v13_option2' name='isAddressValid13' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) le madri, 168 w. 18th st., new york, italian<br /> Address 2) au mandarin, 200-250 vesey st. world financial center, new york, asian</p>
+          <div class='form-group'><label class='verify14'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v14_option1' name='isAddressValid14' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v14_option2' name='isAddressValid14' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) sea grill, 19 w. 49th st., new york, seafood<br /> Address 2) judson grill, 152 w. 52nd st., new york, american</p>
+          <div class='form-group'><label class='verify15'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v15_option1' name='isAddressValid15' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v15_option2' name='isAddressValid15' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) sea grill, 19 w. 49th st., new york, seafood<br /> Address 2) judson grill, 152 w. 52nd st., new york, american</p>
+          <div class='form-group'><label class='verify16'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v16_option1' name='isAddressValid16' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v16_option2' name='isAddressValid16' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) mesa grill, 102 fifth ave., new york city, southwestern<br /> Address 2) border grill, 4th st., los angeles, mexican</p>
+          <div class='form-group'><label class='verify17'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v17_option1' name='isAddressValid17' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v17_option2' name='isAddressValid17' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) zuni cafe & grill, 1658 market st., san francisco, mediterranean<br /> Address 2) inca grill, 492 broome st.  near w. broadway, new york, latin american</p>
+          <div class='form-group'><label class='verify18'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v18_option1' name='isAddressValid18' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v18_option2' name='isAddressValid18' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) cafe blanc, 9777 little santa monica blvd., beverly hills, pacific new wave<br /> Address 2) caffe lure, 169 sullivan st.  between houston and bleecker sts., new york, french</p>
+          <div class='form-group'><label class='verify19'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v19_option1' name='isAddressValid19' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v19_option2' name='isAddressValid19' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+          <p>Address 1) trio cafe, 1870 fillmore st., san francisco, american<br /> Address 2) stars cafe, 500 van ness ave., san francisco, american</p>
+          <div class='form-group'><label class='verify20'>Are these addresses belong to the same restaurant?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v20_option1' name='isAddressValid20' required='' type='radio' value='yes' /> Belong to the same </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v20_option2' name='isAddressValid20' required='' type='radio' value='no' /> Doesn't belong to the same </label></div>
+          </div>
+          <div><br></div>
+        </div>
+
+        <style type='text/css'>#collapseTrigger{
+          color:#00F;
+          display: block;
+          text-decoration: none;
+        }
+        #submitButton{
+          white-space: normal;
+        }
+        .image{
+          margin-bottom: 15px;
+        }
+        .group-label{
+          display: block;
+        }
+        .radio-inline>label{
+          font-weight: normal;
+        }
+        </style>
+        
+        <script type='text/json' id='input'>
+  
+</script>
+<form id='results-form' method='post' action='dummy' class='text-center'>
+  <input type='hidden' value='' name='assignmentId' id='assignmentId'/>
+  <input type='hidden' value='' name='output' id='output'/>
+  <input type='submit' class='btn btn-lg btn-success' id='submit-btn' value='Submit' disabled/>          
+</form>
+<script>
+  var simpleamt = (function() {
+    
+    // Copied from http://james.padolsey.com/javascript/bujs-1-getparameterbyname/
+    function getUrlParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
+    }
+
+    function getInput(default_input) {
+      if (typeof(default_input) === 'undefined') default_input = null;
+      try {
+        return JSON.parse($('#input').html());
+      } catch (e) {
+        return default_input;
+      }
+    }
+
+    function setOutput(output) {
+      $('#output').val(JSON.stringify(output));
+    }
+
+    function isPreview() {
+      var assignment_id = getUrlParam('assignmentId');
+      if (assignment_id === null) return false;
+      return assignment_id == 'ASSIGNMENT_ID_NOT_AVAILABLE';
+    }
+
+    function setupSubmit() {
+      var submit_to = getUrlParam('turkSubmitTo');
+      $('#results-form').attr('action', submit_to + '/mturk/externalSubmit');                      
+      $('#assignmentId').val(getUrlParam('assignmentId'));
+    }
+
+    return {
+      getInput: getInput,
+      setOutput: setOutput,
+      isPreview: isPreview,
+      setupSubmit: setupSubmit,
+    }
+
+  })();
+</script>
+
+        <script>
+          $(function() {
+
+            function main() {
+
+              // If the HIT is not in preview mode, then we need to enable the UI
+              // and set up the logic for submitting.
+              if (!simpleamt.isPreview()) {
+                enable_ui();
+
+                // You need to call this in every HIT; if you forget then you will
+                // get an error message when you try and submit the HIT.
+                simpleamt.setupSubmit();
+
+                // Set up a click handler for the submit button.
+                // Typically this will validate user output and either submit the
+                // HIT if the data is good or show an error message to the user if
+                // the data is bad. If this click handler returns false then the
+                // HIT will not be submitted.
+                // WARNING: If the click handler throws an exception
+                // then by default the HIT will be submitted; this is a fertile
+                // source of bugs.
+                $('#submit-btn').click(function() {
+                  // Read in the examples.
+                  var v00_is_valid = '';
+                  if (document.getElementById('v00_option1').checked) {
+                    v00_is_valid = document.getElementById('v00_option1').value;
+                  }
+                  else if (document.getElementById('v00_option2').checked) {
+                    v00_is_valid = document.getElementById('v00_option2').value;
+                  }
+                  var v01_is_valid = '';
+                  if (document.getElementById('v01_option1').checked) {
+                    v01_is_valid = document.getElementById('v01_option1').value;
+                  }
+                  else if (document.getElementById('v01_option2').checked) {
+                    v01_is_valid = document.getElementById('v01_option2').value;
+                  }
+
+                  // Read in the verification result.
+                  var v1_is_valid = '';
+                  if (document.getElementById('v1_option1').checked) {
+                    v1_is_valid = document.getElementById('v1_option1').value;
+                  }
+                  else if (document.getElementById('v1_option2').checked) {
+                    v1_is_valid = document.getElementById('v1_option2').value;
+                  }
+                  var v2_is_valid = '';
+                  if (document.getElementById('v2_option1').checked) {
+                    v2_is_valid = document.getElementById('v2_option1').value;
+                  }
+                  else if (document.getElementById('v2_option2').checked) {
+                    v2_is_valid = document.getElementById('v2_option2').value;
+                  }
+                  var v3_is_valid = '';
+                  if (document.getElementById('v3_option1').checked) {
+                    v3_is_valid = document.getElementById('v3_option1').value;
+                  }
+                  else if (document.getElementById('v3_option2').checked) {
+                    v3_is_valid = document.getElementById('v3_option2').value;
+                  }
+                  var v4_is_valid = '';
+                  if (document.getElementById('v4_option1').checked) {
+                    v4_is_valid = document.getElementById('v4_option1').value;
+                  }
+                  else if (document.getElementById('v4_option2').checked) {
+                    v4_is_valid = document.getElementById('v4_option2').value;
+                  }
+                  var v5_is_valid = '';
+                  if (document.getElementById('v5_option1').checked) {
+                    v5_is_valid = document.getElementById('v5_option1').value;
+                  }
+                  else if (document.getElementById('v5_option2').checked) {
+                    v5_is_valid = document.getElementById('v5_option2').value;
+                  }
+                  var v6_is_valid = '';
+                  if (document.getElementById('v6_option1').checked) {
+                    v6_is_valid = document.getElementById('v6_option1').value;
+                  }
+                  else if (document.getElementById('v6_option2').checked) {
+                    v6_is_valid = document.getElementById('v6_option2').value;
+                  }
+                  var v7_is_valid = '';
+                  if (document.getElementById('v7_option1').checked) {
+                    v7_is_valid = document.getElementById('v7_option1').value;
+                  }
+                  else if (document.getElementById('v7_option2').checked) {
+                    v7_is_valid = document.getElementById('v7_option2').value;
+                  }
+                  var v8_is_valid = '';
+                  if (document.getElementById('v8_option1').checked) {
+                    v8_is_valid = document.getElementById('v8_option1').value;
+                  }
+                  else if (document.getElementById('v8_option2').checked) {
+                    v8_is_valid = document.getElementById('v8_option2').value;
+                  }
+                  var v9_is_valid = '';
+                  if (document.getElementById('v9_option1').checked) {
+                    v9_is_valid = document.getElementById('v9_option1').value;
+                  }
+                  else if (document.getElementById('v9_option2').checked) {
+                    v9_is_valid = document.getElementById('v9_option2').value;
+                  }
+                  var v10_is_valid = '';
+                  if (document.getElementById('v10_option1').checked) {
+                    v10_is_valid = document.getElementById('v10_option1').value;
+                  }
+                  else if (document.getElementById('v10_option2').checked) {
+                    v10_is_valid = document.getElementById('v10_option2').value;
+                  }
+                  var v11_is_valid = '';
+                  if (document.getElementById('v11_option1').checked) {
+                    v11_is_valid = document.getElementById('v11_option1').value;
+                  }
+                  else if (document.getElementById('v11_option2').checked) {
+                    v11_is_valid = document.getElementById('v11_option2').value;
+                  }
+                  var v12_is_valid = '';
+                  if (document.getElementById('v12_option1').checked) {
+                    v12_is_valid = document.getElementById('v12_option1').value;
+                  }
+                  else if (document.getElementById('v12_option2').checked) {
+                    v12_is_valid = document.getElementById('v12_option2').value;
+                  }
+                  var v13_is_valid = '';
+                  if (document.getElementById('v13_option1').checked) {
+                    v13_is_valid = document.getElementById('v13_option1').value;
+                  }
+                  else if (document.getElementById('v13_option2').checked) {
+                    v13_is_valid = document.getElementById('v13_option2').value;
+                  }
+                  var v14_is_valid = '';
+                  if (document.getElementById('v14_option1').checked) {
+                    v14_is_valid = document.getElementById('v14_option1').value;
+                  }
+                  else if (document.getElementById('v14_option2').checked) {
+                    v14_is_valid = document.getElementById('v14_option2').value;
+                  }
+                  var v15_is_valid = '';
+                  if (document.getElementById('v15_option1').checked) {
+                    v15_is_valid = document.getElementById('v15_option1').value;
+                  }
+                  else if (document.getElementById('v15_option2').checked) {
+                    v15_is_valid = document.getElementById('v15_option2').value;
+                  }
+                  var v16_is_valid = '';
+                  if (document.getElementById('v16_option1').checked) {
+                    v16_is_valid = document.getElementById('v16_option1').value;
+                  }
+                  else if (document.getElementById('v16_option2').checked) {
+                    v16_is_valid = document.getElementById('v16_option2').value;
+                  }
+                  var v17_is_valid = '';
+                  if (document.getElementById('v17_option1').checked) {
+                    v17_is_valid = document.getElementById('v17_option1').value;
+                  }
+                  else if (document.getElementById('v17_option2').checked) {
+                    v17_is_valid = document.getElementById('v17_option2').value;
+                  }
+                  var v18_is_valid = '';
+                  if (document.getElementById('v18_option1').checked) {
+                    v18_is_valid = document.getElementById('v18_option1').value;
+                  }
+                  else if (document.getElementById('v18_option2').checked) {
+                    v18_is_valid = document.getElementById('v18_option2').value;
+                  }
+                  var v19_is_valid = '';
+                  if (document.getElementById('v18_option1').checked) {
+                    v19_is_valid = document.getElementById('v19_option1').value;
+                  }
+                  else if (document.getElementById('v19_option2').checked) {
+                    v19_is_valid = document.getElementById('v19_option2').value;
+                  }
+                  var v20_is_valid = '';
+                  if (document.getElementById('v20_option1').checked) {
+                    v20_is_valid = document.getElementById('v20_option1').value;
+                  }
+                  else if (document.getElementById('v20_option2').checked) {
+                    v20_is_valid = document.getElementById('v20_option2').value;
+                  }
+
+                  // Construct an object containing the output of this assignment.
+                  var output = {
+                    v1_is_valid: v1_is_valid,
+                    v2_is_valid: v2_is_valid,
+                    v3_is_valid: v3_is_valid,
+                    v4_is_valid: v4_is_valid,
+                    v5_is_valid: v5_is_valid,
+                    v6_is_valid: v6_is_valid,
+                    v7_is_valid: v7_is_valid,
+                    v8_is_valid: v8_is_valid,
+                    v9_is_valid: v9_is_valid,
+                    v10_is_valid: v10_is_valid,
+                    v11_is_valid: v11_is_valid,
+                    v12_is_valid: v12_is_valid,
+                    v13_is_valid: v13_is_valid,
+                    v14_is_valid: v14_is_valid,
+                    v15_is_valid: v15_is_valid,
+                    v16_is_valid: v16_is_valid,
+                    v17_is_valid: v17_is_valid,
+                    v18_is_valid: v18_is_valid,
+                    v19_is_valid: v19_is_valid,
+                    v20_is_valid: v20_is_valid,
+                  };
+
+                  // Sanity check
+                  if (v00_is_valid === 'no' ||
+                      v01_is_valid === 'yes') {
+                    alert('Please read the instructions carefully and try to answer the questions correctly.');
+                    return false; }
+                  else {
+                    simpleamt.setOutput(output); }
+                    
+
+                  // Validate the output
+                  if (output.v1_is_valid.length < 1 ||
+                      output.v2_is_valid.length < 1 ||
+                      output.v3_is_valid.length < 1 ||
+                      output.v4_is_valid.length < 1 ||
+                      output.v5_is_valid.length < 1 ||
+                      output.v6_is_valid.length < 1 ||
+                      output.v7_is_valid.length < 1 ||
+                      output.v8_is_valid.length < 1 ||
+                      output.v9_is_valid.length < 1 ||
+                      output.v10_is_valid.length < 1 ||
+                      output.v11_is_valid.length < 1 ||
+                      output.v12_is_valid.length < 1 ||
+                      output.v13_is_valid.length < 1 ||
+                      output.v14_is_valid.length < 1 ||
+                      output.v15_is_valid.length < 1 ||
+                      output.v16_is_valid.length < 1 ||
+                      output.v17_is_valid.length < 1 ||
+                      output.v18_is_valid.length < 1 ||
+                      output.v19_is_valid.length < 1 ||
+                      output.v20_is_valid.length < 1) {
+                    alert('Please verify all the addresses to submit');
+                    return false; }
+                  else {
+                    simpleamt.setOutput(output); }
+                })
+              }
+            }
+
+            function enable_ui() {
+              // Enable the submit button. You must do this in every HIT.
+              $('#submit-btn').prop('disabled', false);
+            }
+
+            main();
+
+          });
+        </script>
+
+      </body>
+    </html>
+    

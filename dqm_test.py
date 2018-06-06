@@ -101,8 +101,8 @@ class DQMTest(unittest.TestCase):
 
         est_list = [vNominal]
         gt_list = [lambda x: gt]
-        n_max_ = [30, 100]
-        n_batch_ = [1, 10, n_workers]
+        n_max_ = [100]
+        n_batch_ = [1, 5, 10, n_workers]
         legend = (["VOTING"] #+ ["T-WALK(%s)"%n_max for n_max in n_max_seq] 
                             + ["%s T-WALK(%s)"%(n_batch,n_max) for n_batch in n_batch_ for n_max in n_max_])
         legend_gt = ["Ground Truth"]

@@ -1,0 +1,9 @@
+{
+  "title": "Verify home addresses in OR, USA.",
+  "description": "Verify 20 US home addresses in Oregon (see instructions).",
+  "keywords": "address,home,verify,demographic",
+  "reward": 0.04,
+  "duration": 400,
+  "frame_height": 20000,
+  "max_assignments": 1
+}

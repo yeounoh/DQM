@@ -1,0 +1,465 @@
+
+    <html>
+      <head>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js'></script>
+        <script src='//cdnjs.cloudflare.com/ajax/libs/json3/3.3.2/json3.min.js'></script>
+        <link href='//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css' rel='stylesheet'>    
+      </head>
+      <body>
+        <!-- Instructions -->
+        <div class='row'>
+        <div class='col-xs-12 col-md-12'>
+        <div class='panel panel-primary'><a class='panel-heading' href='javascript:void(0);' id='collapseTrigger'><strong>Home Address in Oregon Verification Instructions</strong></a>
+        <div class='panel-body' id='instructionBody'>
+        <p>Verify the address below as a home address in Oregon, U.S.A.</p>
+        <ul>
+            <li>Indicate if the address (below) is a valid home address in Oregon, U.S.A. or not</li>
+            <li><strong>A valid home adsdress</strong> should have street number and name, (optional) a unit number, and city (e.g., Portland), state (e.g., OR) and ZIP (e.g., 97007),</li> 
+            <li>and all components strictly <strong>in this order</strong>; a unit number can't come before street address.</li>
+            <li> e.g., 12240 Southwest Horizon Boulevard Appartment # 106 Portland, OR 97007 <strong> is valid</strong>
+            <li> e.g., 12240 Southwest Horizon Boulevard Portland, OR 97007 <strong> is valid</strong>
+            <li> e.g., Appartment # 106 12240 Southwest Horizon Boulevard Portland, OR 97007 <strong>is not valid</strong>
+            <li> e.g., 12240 Southwest Horizon Boulevard, OR 97007 <strong> is not valid</strong>
+        </ul>
+        </div>
+        </div>
+        </div>
+        </div>
+        <!-- End Instructions -->
+
+        <div class='container'>
+          <h1>20 Home Addresses in Oregon Verification</h1>
+
+          <p>PRACTICE 1) Street number must come before unit number:
+Appartment # 106 12240 Southwest Horizon Boulevard Portland, OR 97007</p>
+          <div class='form-group'><label class='verify00'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v00_option1' name='isAddressValid00' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v00_option2' name='isAddressValid00' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>PRACTICE 2) APT/UNIT number is optional & Portland, OR 97007 must be present:
+12240 Southwest Horizon Boulevard Portland, OR 97007</p>
+          <div class='form-group'><label class='verify01'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v01_option1' name='isAddressValid01' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v01_option2' name='isAddressValid01' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+        </div>
+
+        <div class='container'>
+          <p>Apartment  # 101 12805 Southwest Merganser Lane Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify1'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v1_option1' name='isAddressValid' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v1_option2' name='isAddressValid' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 101 15474 Southwest Mallard Drive Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify2'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v2_option1' name='isAddressValid2' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v2_option2' name='isAddressValid2' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 301 14836 Southwest Scholls Ferry Road Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify3'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v3_option1' name='isAddressValid3' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v3_option2' name='isAddressValid3' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>12025 Southwest Chukar Terrace Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify4'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v4_option1' name='isAddressValid4' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v4_option2' name='isAddressValid4' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>14705 Southwest Sandhill Loop Apartment  # 204 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify5'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v5_option1' name='isAddressValid5' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v5_option2' name='isAddressValid5' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 302 12360 Southwest Horizon Boulevard Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify6'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v6_option1' name='isAddressValid6' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v6_option2' name='isAddressValid6' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>12675 Southwest Night Heron Lane Apartment  # 100 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify7'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v7_option1' name='isAddressValid7' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v7_option2' name='isAddressValid7' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>15305 Southwest Mallard Drive Apartment  # 103 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify8'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v8_option1' name='isAddressValid8' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v8_option2' name='isAddressValid8' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 202 14740 Southwest Sandhill Loop Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify9'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v9_option1' name='isAddressValid9' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v9_option2' name='isAddressValid9' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>14740 Southwest Sandhill Loop Apartment  # 201 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify10'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v10_option1' name='isAddressValid10' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v10_option2' name='isAddressValid10' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>15170 Southwest Barrows Road Apartment  # 202 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify11'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v11_option1' name='isAddressValid11' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v11_option2' name='isAddressValid11' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 303 14818 Southwest Scholls Ferry Road Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify12'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v12_option1' name='isAddressValid12' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v12_option2' name='isAddressValid12' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 102 15305 Southwest Mallard Drive Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify13'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v13_option1' name='isAddressValid13' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v13_option2' name='isAddressValid13' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>15395 Southwest Sparrow Loop Apartment  # 104 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify14'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v14_option1' name='isAddressValid14' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v14_option2' name='isAddressValid14' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>12240 Southwest Horizon Boulevard Apartment  # 203 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify15'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v15_option1' name='isAddressValid15' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v15_option2' name='isAddressValid15' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>Apartment  # 202 14740 Southwest Sandhill Loop Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify16'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v16_option1' name='isAddressValid16' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v16_option2' name='isAddressValid16' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>14842 Southwest Scholls Ferry Road Apartment  # 303 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify17'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v17_option1' name='isAddressValid17' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v17_option2' name='isAddressValid17' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>14925 Southwest Sandhill Loop Apartment  # 102 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify18'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v18_option1' name='isAddressValid18' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v18_option2' name='isAddressValid18' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>15445 Southwest Sparrow Loop Apartment  # 105 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify19'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v19_option1' name='isAddressValid19' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v19_option2' name='isAddressValid19' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+          <p>12360 Southwest Horizon Boulevard Apartment  # 205 Portland, OR 97007
+</p>
+          <div class='form-group'><label class='verify20'>Is the address valid?</label>
+            <div class='radio-inline'><label><input autocomplete='off' id='v20_option1' name='isAddressValid20' required='' type='radio' value='yes' /> Is valid </label></div>
+            <div class='radio-inline'><label><input autocomplete='off' id='v20_option2' name='isAddressValid20' required='' type='radio' value='no' /> Is NOT valid </label></div>
+          </div>
+          <div><br></div>
+        </div>
+
+        <style type='text/css'>#collapseTrigger{
+          color:#00F;
+          display: block;
+          text-decoration: none;
+        }
+        #submitButton{
+          white-space: normal;
+        }
+        .image{
+          margin-bottom: 15px;
+        }
+        .group-label{
+          display: block;
+        }
+        .radio-inline>label{
+          font-weight: normal;
+        }
+        </style>
+        
+        {% include 'hit_templates/simpleamt.html' %}
+
+        <script>
+          $(function() {
+
+            function main() {
+
+              // If the HIT is not in preview mode, then we need to enable the UI
+              // and set up the logic for submitting.
+              if (!simpleamt.isPreview()) {
+                enable_ui();
+
+                // You need to call this in every HIT; if you forget then you will
+                // get an error message when you try and submit the HIT.
+                simpleamt.setupSubmit();
+
+                // Set up a click handler for the submit button.
+                // Typically this will validate user output and either submit the
+                // HIT if the data is good or show an error message to the user if
+                // the data is bad. If this click handler returns false then the
+                // HIT will not be submitted.
+                // WARNING: If the click handler throws an exception
+                // then by default the HIT will be submitted; this is a fertile
+                // source of bugs.
+                $('#submit-btn').click(function() {
+                  // Read in the examples.
+                  var v00_is_valid = '';
+                  if (document.getElementById('v00_option1').checked) {
+                    v00_is_valid = document.getElementById('v00_option1').value;
+                  }
+                  else if (document.getElementById('v00_option2').checked) {
+                    v00_is_valid = document.getElementById('v00_option2').value;
+                  }
+                  var v01_is_valid = '';
+                  if (document.getElementById('v01_option1').checked) {
+                    v01_is_valid = document.getElementById('v01_option1').value;
+                  }
+                  else if (document.getElementById('v01_option2').checked) {
+                    v01_is_valid = document.getElementById('v01_option2').value;
+                  }
+
+                  // Read in the verification result.
+                  var v1_is_valid = '';
+                  if (document.getElementById('v1_option1').checked) {
+                    v1_is_valid = document.getElementById('v1_option1').value;
+                  }
+                  else if (document.getElementById('v1_option2').checked) {
+                    v1_is_valid = document.getElementById('v1_option2').value;
+                  }
+                  var v2_is_valid = '';
+                  if (document.getElementById('v2_option1').checked) {
+                    v2_is_valid = document.getElementById('v2_option1').value;
+                  }
+                  else if (document.getElementById('v2_option2').checked) {
+                    v2_is_valid = document.getElementById('v2_option2').value;
+                  }
+                  var v3_is_valid = '';
+                  if (document.getElementById('v3_option1').checked) {
+                    v3_is_valid = document.getElementById('v3_option1').value;
+                  }
+                  else if (document.getElementById('v3_option2').checked) {
+                    v3_is_valid = document.getElementById('v3_option2').value;
+                  }
+                  var v4_is_valid = '';
+                  if (document.getElementById('v4_option1').checked) {
+                    v4_is_valid = document.getElementById('v4_option1').value;
+                  }
+                  else if (document.getElementById('v4_option2').checked) {
+                    v4_is_valid = document.getElementById('v4_option2').value;
+                  }
+                  var v5_is_valid = '';
+                  if (document.getElementById('v5_option1').checked) {
+                    v5_is_valid = document.getElementById('v5_option1').value;
+                  }
+                  else if (document.getElementById('v5_option2').checked) {
+                    v5_is_valid = document.getElementById('v5_option2').value;
+                  }
+                  var v6_is_valid = '';
+                  if (document.getElementById('v6_option1').checked) {
+                    v6_is_valid = document.getElementById('v6_option1').value;
+                  }
+                  else if (document.getElementById('v6_option2').checked) {
+                    v6_is_valid = document.getElementById('v6_option2').value;
+                  }
+                  var v7_is_valid = '';
+                  if (document.getElementById('v7_option1').checked) {
+                    v7_is_valid = document.getElementById('v7_option1').value;
+                  }
+                  else if (document.getElementById('v7_option2').checked) {
+                    v7_is_valid = document.getElementById('v7_option2').value;
+                  }
+                  var v8_is_valid = '';
+                  if (document.getElementById('v8_option1').checked) {
+                    v8_is_valid = document.getElementById('v8_option1').value;
+                  }
+                  else if (document.getElementById('v8_option2').checked) {
+                    v8_is_valid = document.getElementById('v8_option2').value;
+                  }
+                  var v9_is_valid = '';
+                  if (document.getElementById('v9_option1').checked) {
+                    v9_is_valid = document.getElementById('v9_option1').value;
+                  }
+                  else if (document.getElementById('v9_option2').checked) {
+                    v9_is_valid = document.getElementById('v9_option2').value;
+                  }
+                  var v10_is_valid = '';
+                  if (document.getElementById('v10_option1').checked) {
+                    v10_is_valid = document.getElementById('v10_option1').value;
+                  }
+                  else if (document.getElementById('v10_option2').checked) {
+                    v10_is_valid = document.getElementById('v10_option2').value;
+                  }
+                  var v11_is_valid = '';
+                  if (document.getElementById('v11_option1').checked) {
+                    v11_is_valid = document.getElementById('v11_option1').value;
+                  }
+                  else if (document.getElementById('v11_option2').checked) {
+                    v11_is_valid = document.getElementById('v11_option2').value;
+                  }
+                  var v12_is_valid = '';
+                  if (document.getElementById('v12_option1').checked) {
+                    v12_is_valid = document.getElementById('v12_option1').value;
+                  }
+                  else if (document.getElementById('v12_option2').checked) {
+                    v12_is_valid = document.getElementById('v12_option2').value;
+                  }
+                  var v13_is_valid = '';
+                  if (document.getElementById('v13_option1').checked) {
+                    v13_is_valid = document.getElementById('v13_option1').value;
+                  }
+                  else if (document.getElementById('v13_option2').checked) {
+                    v13_is_valid = document.getElementById('v13_option2').value;
+                  }
+                  var v14_is_valid = '';
+                  if (document.getElementById('v14_option1').checked) {
+                    v14_is_valid = document.getElementById('v14_option1').value;
+                  }
+                  else if (document.getElementById('v14_option2').checked) {
+                    v14_is_valid = document.getElementById('v14_option2').value;
+                  }
+                  var v15_is_valid = '';
+                  if (document.getElementById('v15_option1').checked) {
+                    v15_is_valid = document.getElementById('v15_option1').value;
+                  }
+                  else if (document.getElementById('v15_option2').checked) {
+                    v15_is_valid = document.getElementById('v15_option2').value;
+                  }
+                  var v16_is_valid = '';
+                  if (document.getElementById('v16_option1').checked) {
+                    v16_is_valid = document.getElementById('v16_option1').value;
+                  }
+                  else if (document.getElementById('v16_option2').checked) {
+                    v16_is_valid = document.getElementById('v16_option2').value;
+                  }
+                  var v17_is_valid = '';
+                  if (document.getElementById('v17_option1').checked) {
+                    v17_is_valid = document.getElementById('v17_option1').value;
+                  }
+                  else if (document.getElementById('v17_option2').checked) {
+                    v17_is_valid = document.getElementById('v17_option2').value;
+                  }
+                  var v18_is_valid = '';
+                  if (document.getElementById('v18_option1').checked) {
+                    v18_is_valid = document.getElementById('v18_option1').value;
+                  }
+                  else if (document.getElementById('v18_option2').checked) {
+                    v18_is_valid = document.getElementById('v18_option2').value;
+                  }
+                  var v19_is_valid = '';
+                  if (document.getElementById('v19_option1').checked) {
+                    v19_is_valid = document.getElementById('v19_option1').value;
+                  }
+                  else if (document.getElementById('v19_option2').checked) {
+                    v19_is_valid = document.getElementById('v19_option2').value;
+                  }
+                  var v20_is_valid = '';
+                  if (document.getElementById('v20_option1').checked) {
+                    v20_is_valid = document.getElementById('v20_option1').value;
+                  }
+                  else if (document.getElementById('v20_option2').checked) {
+                    v20_is_valid = document.getElementById('v20_option2').value;
+                  }
+
+                  // Construct an object containing the output of this assignment.
+                  var output = {
+                    v1_is_valid: v1_is_valid,
+                    v2_is_valid: v2_is_valid,
+                    v3_is_valid: v3_is_valid,
+                    v4_is_valid: v4_is_valid,
+                    v5_is_valid: v5_is_valid,
+                    v6_is_valid: v6_is_valid,
+                    v7_is_valid: v7_is_valid,
+                    v8_is_valid: v8_is_valid,
+                    v9_is_valid: v9_is_valid,
+                    v10_is_valid: v10_is_valid,
+                    v11_is_valid: v11_is_valid,
+                    v12_is_valid: v12_is_valid,
+                    v13_is_valid: v13_is_valid,
+                    v14_is_valid: v14_is_valid,
+                    v15_is_valid: v15_is_valid,
+                    v16_is_valid: v16_is_valid,
+                    v17_is_valid: v17_is_valid,
+                    v18_is_valid: v18_is_valid,
+                    v19_is_valid: v19_is_valid,
+                    v20_is_valid: v20_is_valid
+                  };
+
+                  // Sanity check
+                  if (v00_is_valid === 'yes' ||
+                      v01_is_valid === 'no') {
+                    alert('Please read the instructions carefully and try to answer the questions correctly.');
+                    return false; }
+
+                  // Validate the output
+                  if (output.v1_is_valid.length < 1 ||
+                      output.v2_is_valid.length < 1 ||
+                      output.v3_is_valid.length < 1 ||
+                      output.v4_is_valid.length < 1 ||
+                      output.v5_is_valid.length < 1 ||
+                      output.v6_is_valid.length < 1 ||
+                      output.v7_is_valid.length < 1 ||
+                      output.v8_is_valid.length < 1 ||
+                      output.v9_is_valid.length < 1 ||
+                      output.v10_is_valid.length < 1 ||
+                      output.v11_is_valid.length < 1 ||
+                      output.v12_is_valid.length < 1 ||
+                      output.v13_is_valid.length < 1 ||
+                      output.v14_is_valid.length < 1 ||
+                      output.v15_is_valid.length < 1 ||
+                      output.v16_is_valid.length < 1 ||
+                      output.v17_is_valid.length < 1 ||
+                      output.v18_is_valid.length < 1 ||
+                      output.v19_is_valid.length < 1 ||
+                      output.v20_is_valid.length < 1) {
+                    alert('Please verify all the addresses to submit');
+                    return false; }
+                  else {
+                    simpleamt.setOutput(output); }
+                })
+              }
+            }
+
+            function enable_ui() {
+              // Enable the submit button. You must do this in every HIT.
+              $('#submit-btn').prop('disabled', false);
+            }
+
+            main();
+
+          });
+        </script>
+
+      </body>
+    </html>
+    
