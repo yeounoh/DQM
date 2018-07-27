@@ -596,10 +596,10 @@ def test_exp_address_dataset():
                 hit_ids_path='examples/address/hit_ids.txt') # post a random batch task
 
     #get results until we have some results back?
-    results = get_results(hit_ids)
-    with open('examples/address/results.txt','a+') as f:
-        for r in results:
-            f.write(json.dumps(r))
+    #results = get_results(hit_ids)
+    #with open('examples/address/results.txt','a+') as f:
+    #    for r in results:
+    #        f.write(json.dumps(r))
     # approve submitted HITs
     disable_hit(hit_ids) # remove the HITs on hit_ids.txt
 
@@ -664,6 +664,6 @@ def process_estimates():
 
 if __name__ == '__main__':
     #load_address_dataset()
-    #test_exp_address_dataset()
+    test_exp_address_dataset()
     #test_triangular_walk()
-    process_estimates()
+    #process_estimates()

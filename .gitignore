@@ -2,6 +2,8 @@ dataset/*
 figure/*
 log/*
 
+amt/config.json
+
 *.pyc
 *.p
 *.txt

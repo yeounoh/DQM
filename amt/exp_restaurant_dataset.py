@@ -535,7 +535,7 @@ def test_triangular_walk():
     estimates = triangular_walk_using_amt(data, label, update_restaurant_template, 
                     'examples/restaurant/hit_ids.txt','hit_templates/restaurant.html',
                     'hit_properties/restaurant.json', 'examples/restaurant/results.txt',
-                    n_workers=500, sandbox=False, dirty_is_no=False)
+                    n_workers=2, sandbox=True, dirty_is_no=False)
     end_time = time.time()
     pickle.dump(estimates, open('examples/restaurant/t_walk.p','wb'))
     print('It took %s.'%(end_time - start_time))
@@ -571,5 +571,5 @@ def process_estimates():
 
 if __name__ == '__main__':
     #test_exp_restaurant_dataset()
-    #test_triangular_walk()
-    process_estimates()
+    test_triangular_walk()
+    #process_estimates()
