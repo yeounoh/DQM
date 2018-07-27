@@ -6,3 +6,9 @@ Estimating the number of remaining errors (aka Data Quality Metric/`DQM`) in a d
 ```python
 python dqm_test.py DQMTest.test_estimators
 ```
+
+## Amazon Mechanical Turks Expeirments
+`amt/` folder contains codes for AMT experiments. The experiments (data cleaning or error detection) were crowdsourced on AMT.
+```python
+python amt/exp_restaurant_dataset.py
+```
