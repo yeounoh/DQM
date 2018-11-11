@@ -29,8 +29,8 @@ class DQMTest(unittest.TestCase):
         
         with concurrent.futures.ProcessPoolExecutor() as executor:
             batch_jobs = dict()
-            for rho in [0.01, 0.02, 0.03]:
-                for prec in [0.7, 0.8, 0.9]:
+            for rho in [0.01]:
+                for prec in [0.7]:
                     for cov in [20./n_items]:
                         # VOTING and SWITCH
                         data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
@@ -59,11 +59,16 @@ class DQMTest(unittest.TestCase):
                         avg_ = {}
                         std_ = {}
                         for n_max in n_max_:
-                            est_ = []
+                            est_ = list()
+                            n_tasks_ = list()
                             for i in range(n_rep):
-                                est_dict = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers=n_workers, 
+                                est_parallel = list()
+                                for j in range(n_parallel):
+                                    temp = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers = n_workers, 
                                                                            n_max=n_max, w_coverage=cov, w_precision=prec)
-                                est_.append([est_dict[w] for w in w_range])
+                                    est_parallel.append([temp[w] for w in w_range])
+                                cur_est = np.mean(est_parallel, axis=0)
+                                est_.append(cur_est)
                             avg_[n_max] = np.mean(est_, axis=0)
                             std_[n_max] = np.std(est_, axis=0)
 

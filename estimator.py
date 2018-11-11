@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.optimize import linprog
-from scipy.stats import poisson
+#from scipy.optimize import linprog
+#from scipy.stats import poisson
 import random, copy, math, pickle
 import pylab as P
 

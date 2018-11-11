@@ -6,7 +6,7 @@
     Author: yeounoh chung (yeounohster@gmail.com)
 """
 import numpy as np
-import pylab as P
+#import pylab as P
 import matplotlib.pyplot as plt
 import math, random, csv, pickle
 #from estimator import *
@@ -52,8 +52,19 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
 
     return data, ground_truth
 
+default_coeff = {
+    8: 0,
+    9: 6.91310814435742,
+    10: 5.03184709494337,
+    11: 2.10144000103314,
+    12: 0.635599038344795,
+    13: 1.96455080814112,
+    14: 1.01560222816783,
+    15: 1.00912038379987,
+}
+
 def simulation_with_triangular_walk(n_items=1000, n_workers=1000, 
-                                    n_max=50, rho=0.02, w_coverage=0.02, w_precision=0.8):
+                                    n_max=15, rho=0.01, w_coverage=0.02, w_precision=0.8):
     '''
         Simulate the sequential sampling procedure for triangular walks; we run n_items*w_coverage many
         parallel sequential sampling algorithms, and at each point we compute estimates for each of the
@@ -107,14 +118,7 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=1000,
                 if k_/n_ <= 0.5:
                     linear_estimates[i].append(0.)
                 else:
-                    if (2-n_max-2*k_)**2 -4*(2*n_max-2)*k_ >= 0:
-                        p_ = ( 2.*k_+n_max-2+math.sqrt((2-n_max-2*k_)**2-4*(2*n_max-2)*k_)) / (4.*n_max-4)
-                    else:
-                        p_ = ((2.*k_+n_max-2)/(4*n_max-4))
-                    #p_ = k_/n_max
-                    #print 1./(2*p_-1.)
-                    p_ = max(p_, 0.6)
-                    linear_estimates[i].append(1./(2*p_-1.) - 0.165*p_*(1-p_)/(2*p_ - 1)**2)
+                    linear_estimates[i].append(coefficients[k_])
 
         for i in completed:
             # reset because we allow sample with replacement and re-walk.
