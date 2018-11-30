@@ -15,22 +15,23 @@ class DQMTest(unittest.TestCase):
             The SWITCH evaluation is executed on multiprocessing executor. 
         '''
         n_items = 1000
-        init = 200
-        n_workers = 2000
-        step = 200
+        init = 50
+        n_workers = 1000
+        step = 50
         w_range = range(init, n_workers, step)
-        n_rep = 50
+        n_rep = 10
+        n_parallel = 10
 
         est_list = [vNominal, switch]
         gt_list = [lambda x: gt, lambda x: gt]
-        n_max_ = [100]
+        n_max_ = [15]
         legend = ["VOTING","SWITCH"] + ["T-WALK(%s)"%n_max for n_max in n_max_]
         legend_gt = ["Ground Truth"]
         
         with concurrent.futures.ProcessPoolExecutor() as executor:
             batch_jobs = dict()
-            for rho in [0.01]:
-                for prec in [0.7]:
+            for rho in [0.005, 0.01, 0.03, 0.1]:
+                for prec in [0.8, 0.9, 1]:
                     for cov in [20./n_items]:
                         # VOTING and SWITCH
                         data, gt = simulated_data(n_items, n_workers, rho, w_precision=prec, w_coverage=cov)
@@ -64,9 +65,9 @@ class DQMTest(unittest.TestCase):
                             for i in range(n_rep):
                                 est_parallel = list()
                                 for j in range(n_parallel):
-                                    temp = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers = n_workers, 
+                                    temp = simulation_with_triangular_walk(n_items=n_items, rho=rho, n_workers = int(n_workers*1./n_parallel), 
                                                                            n_max=n_max, w_coverage=cov, w_precision=prec)
-                                    est_parallel.append([temp[w] for w in w_range])
+                                    est_parallel.append([temp[int(w*1./n_parallel)] for w in w_range])
                                 cur_est = np.mean(est_parallel, axis=0)
                                 est_.append(cur_est)
                             avg_[n_max] = np.mean(est_, axis=0)
@@ -89,7 +90,7 @@ class DQMTest(unittest.TestCase):
                         plotY1Y2((X,Y,GT), legend=legend, legend_gt=legend_gt,
                                  xaxis='Tasks', yaxis='# Error Estimate', 
                                  xmin = init, ymax=150, loc='best', title='Batch size: %s x %s, rho: %s, w_q: %s'%(n_items,cov,rho,prec),
-                                 filename = 'figure/test_estimators_c%s_r%s_q%s.png'%(cov,rho,prec))
+                                 filename = 'figure/fast_short_test_estimators_c%s_r%s_q%s_n%s.png'%(cov,rho,prec,n_items))
 
 
     def test_triangular_walks(self):

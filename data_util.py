@@ -23,7 +23,7 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
         this is embarassingly parallel and is used by SWITCH and VOTING 
         or most crowdsourced cleaning algorithms.
     '''
-
+    
     # Prepare ground truth labels
     label = np.zeros(n_items)
     label[range(int(n_items*rho))] = 1
@@ -52,17 +52,6 @@ def simulated_data(n_items=1000, n_workers=100, rho=0.2, w_coverage=0.02, w_prec
 
     return data, ground_truth
 
-default_coeff = {
-    8: 0,
-    9: 6.91310814435742,
-    10: 5.03184709494337,
-    11: 2.10144000103314,
-    12: 0.635599038344795,
-    13: 1.96455080814112,
-    14: 1.01560222816783,
-    15: 1.00912038379987,
-}
-
 def simulation_with_triangular_walk(n_items=1000, n_workers=1000, 
                                     n_max=15, rho=0.01, w_coverage=0.02, w_precision=0.8):
     '''
@@ -78,6 +67,16 @@ def simulation_with_triangular_walk(n_items=1000, n_workers=1000,
         As an anytime algorithm, we output the current estimate as the sample mean of all the estimates in that
         single bag.
     '''
+    coefficients = {
+        8: 0,
+        9: 6.91310814435742,
+        10: 5.03184709494337,
+        11: 2.10144000103314,
+        12: 0.635599038344795,
+        13: 1.96455080814112,
+        14: 1.01560222816783,
+        15: 1.00912038379987,
+    }
 
     # Ground truth data generation
     label = np.zeros(n_items)

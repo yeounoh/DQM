@@ -201,9 +201,9 @@ def unseen(data):
 def switch(data):
     n_worker = len(data[0])
     est = vNominal(data)
-    thresh = np.max([vNominal(data[:,:n_worker/2]), 
-                     vNominal(data[:,:n_worker/4]), 
-                     vNominal(data[:,:n_worker/4*3]) ])
+    thresh = np.max([vNominal(data[:,:int(n_worker/2)]), 
+                     vNominal(data[:,:int(n_worker/4)]), 
+                     vNominal(data[:,:int(n_worker/4*3)]) ])
     pos_adj = 0
     neg_adj = 0
     if est - thresh < 0:
@@ -313,19 +313,30 @@ def remain_switch(data, pos_switch=True, neg_switch=True):
     data_subset = copy.deepcopy(data)
     majority = np.zeros((len(data_subset),len(data_subset[0])))
     switches = np.zeros((len(data_subset),len(data_subset[0])))
+    n_w = np.zeros(len(data_subset))
+    n_pos = np.zeros(len(data_subset))
+    n_neg = np.zeros(len(data_subset))
+    
     for i in range(len(data_subset)):
         prev = 0
         for w in range(0,len(data_subset[0])):
             # the first worker is compared with an algorithmic worker
-            n_w = np.sum(data[i][0:w+1] != -1)
-            n_pos = np.sum(data[i][0:w+1] == 1)
-            n_neg = np.sum(data[i][0:w+1] == 0)
+            if i != 0:
+                n_w[i] = n_w[i-1]
+                n_pos[i] = n_pos[i-1]
+                n_neg[i] = n_neg[i-1]
+            if data[i][w] != -1:
+                n_w[i] = n_w[i]+1
+                if data[i][w] == 1:
+                    n_pos[i] = n_pos[i]+1
+                if data[i][w] == 0:
+                    n_neg[i] = n_neg[i]+1
 
             maj = 0
-            if n_pos == n_neg and n_pos != 0:
+            if n_pos[i] == n_neg[i] and n_pos[i] != 0:
                 # tie results in switch
                 maj = (prev + 1)%2
-            elif n_pos > n_w/2:
+            elif n_pos[i] > n_w[i]/2:
                 maj = 1
             if prev != maj:
                 if (maj == 1 and pos_switch) or (maj == 0 and neg_switch):
